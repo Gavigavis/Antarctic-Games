@@ -28,6 +28,12 @@ You can also remix this on [Replit](https://replit.com/@sethpanng/Palladium-Game
   2. Configure your web server to serve the files in the Antarctic Games folder
   3. You're good to go! Remember to run ```git pull origin main``` sometimes to keep your link updated.
 
+### Backend-Served Main Site
+  1. Keep this frontend checkout beside the backend checkout, for example at `/opt/Antarctic-Games` next to `/opt/Antarctic-Backend`
+  2. Set `FRONTEND_STATIC_DIR=/opt/Antarctic-Games` in the backend env file
+  3. Put nginx in reverse-proxy mode so `/`, `/api/*`, `/wisp/`, and `/service/scramjet/...` all flow through the backend-owned origin instead of a static nginx root
+  4. Use the backend repo's checked-in cutover artifacts for the exact systemd/nginx setup
+
 ## Local Game Hosting
 The frontend now commits the playable game files, SWFs, thumbnails, and a generated catalog manifest directly into this repo so a blocked `api.antarctic.games` domain does not take the whole games page down.
 The only top-level app page is `index.html`; games launch from the shell into their own tabs through `antarctic://gamelauncher?...` launch URIs.
@@ -50,7 +56,8 @@ The sync script looks for `../antarctic-backend` first, then `../palladium-backe
 The frontend stays fully static. Scramjet, BareMux, libcurl, and the service worker are committed into this repo so the shell can deploy to any static host without a long-running frontend server.
 Plain text lookups from the Antarctic address bar now open DuckDuckGo through the proxied page flow without exposing the remote web URL in the real browser URL bar.
 The Netlify deploy now serves `/api/config/public`, `/api/proxy/health`, `/api/proxy/fetch`, and `/api/proxy/request` directly from a same-origin Netlify function so built-in web browsing can still boot even when `api.antarctic.games` is blocked or unavailable.
-Custom-domain shells such as `https://www.antarctic.games` now treat `https://antarctic-games.netlify.app` as the backend bridge, because the custom-domain `/api/*` paths are still static-shell routes rather than real API handlers.
+Static-host custom domains still treat `https://antarctic-games.netlify.app` as the backend bridge when their `/api/*` paths are only static-shell routes.
+The production `https://antarctic.games` deployment is meant to run through the backend passthrough path instead, so same-origin `/api/*`, `/wisp/`, and `/service/scramjet/...` are real backend routes there.
 The shell now treats the HTTP fallback proxy as the low-latency startup path whenever the public contract advertises it, and only waits on Wisp when a deployment explicitly prefers websocket transport.
 
 The live backend contract is:
