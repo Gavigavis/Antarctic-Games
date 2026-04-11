@@ -42,7 +42,7 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellPage, /<script src="social-client\.js\?v=2026-03-30-bridge-2"><\/script>/);
   assert.match(shellPage, /<script src="baremux\/index\.js\?v=2026-03-30-bridge-2"><\/script>/);
   assert.match(shellPage, /<script src="scram\/scramjet\.all\.js\?v=2026-03-30-bridge-2"><\/script>/);
-  assert.match(shellPage, /Built-in web browsing is temporarily disabled/);
+  assert.match(shellPage, /Preparing built-in web browsing/);
   assert.match(shellPage, /<script src="data\/games-catalog\.js\?v=2026-03-30-bridge-2" data-antarctic-games-catalog="true" data-palladium-games-catalog="true"><\/script>/);
   assert.match(shellPage, /antarctic:\/\/settings/);
   assert.match(shellPage, /antarctic:\/\/account/);
@@ -102,6 +102,8 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /function appendProxyRuntimeAssetVersion\(value\)/);
   assert.match(shellScript, /function resolveProxyRequestUrl\(config\)/);
   assert.match(shellScript, /function resolveProxyFetchUrl\(config\)/);
+  assert.match(shellScript, /function logProxyBootstrapEvent\(type, detail\)/);
+  assert.match(shellScript, /function determineProxyBootstrapPlan\(options\)/);
   assert.match(shellScript, /backendApi && typeof backendApi\.apiUrl === "function"/);
   assert.match(shellScript, /return backendApi\.apiUrl\(explicitPath\);/);
   assert.match(shellScript, /function probeWispTransport\(wispUrl\)/);
@@ -154,7 +156,7 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /function disableProxyRuntime\(\)/);
   assert.match(shellScript, /PROXY_DISABLED_MESSAGE/);
   assert.match(shellScript, /runtime\.controller\.createFrame\(frame\)/);
-  assert.match(shellScript, /renderDisabledWebPane\(tab, tab\.paneEl, "Connecting the web browsing runtime\.\.\."\)/);
+  assert.match(shellScript, /renderDisabledWebPane\(tab, tab\.paneEl, PROXY_BOOT_MESSAGE\)/);
   assert.match(shellScript, /schedulePrivateSearchSubmission\(tab, frame, 1\)/);
   assert.match(shellScript, /setProxyHealth\(\s*true,\s*runtime\.transportMode === "wisp"/);
   assert.match(shellScript, /setProxyHealth\(false, PROXY_IDLE_MESSAGE, "Standby"\)/);
@@ -200,6 +202,7 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /resetControllerBudget:\s*recoverableControllerError/);
   assert.match(shellScript, /config && config\.services && config\.services\.proxyRequest/);
   assert.match(shellScript, /config && config\.services && \(config\.services\.proxyFetch \|\| config\.services\.proxy\)/);
+  assert.match(shellScript, /var bootstrapPlan = determineProxyBootstrapPlan\(/);
   assert.match(shellScript, /var httpTransportUrl = proxyRequestUrl \|\| proxyFetchUrl;/);
   assert.match(shellScript, /\.setRemoteTransport\(createHttpProxyTransport\(config\), httpTransportUrl \|\| "antarctic-http-fallback"\)/);
   assert.match(shellScript, /state\.proxyRuntime\.transportMode = "http-fallback"/);
