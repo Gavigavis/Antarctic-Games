@@ -40,10 +40,36 @@ function loadPrivateSearchHelpers() {
     Event: function Event(type, init) {
       this.type = type;
       this.bubbles = Boolean(init && init.bubbles);
+    },
+    core: {
+      inferWebTitle(value) {
+        try {
+          return new URL(value).hostname || value;
+        } catch (error) {
+          return String(value || "");
+        }
+      }
+    },
+    decodeScramjetUrl(value) {
+      return String(value == null ? "" : value).trim();
+    },
+    renderShellCalls: 0,
+    renderShell() {
+      context.renderShellCalls += 1;
+    },
+    window: {
+      location: {
+        origin: "https://antarctic.games",
+        pathname: "/"
+      }
     }
   };
   const script = [
     "function cleanText(value) { return String(value == null ? '' : value).trim(); }",
+    extractFunctionSource("pushUniqueValue"),
+    extractFunctionSource("getProxyOrigin"),
+    extractFunctionSource("getLocalShellDocumentPaths"),
+    extractFunctionSource("isLocalShellUrl"),
     extractFunctionSource("isDuckDuckGoHost"),
     extractFunctionSource("extractPrivateSearchDetails"),
     extractFunctionSource("resolveVisibleWebUri"),
@@ -53,13 +79,16 @@ function loadPrivateSearchHelpers() {
     extractFunctionSource("syncBrowserUrl"),
     extractFunctionSource("findPrivateSearchField"),
     extractFunctionSource("submitPrivateSearchFromFrame"),
+    extractFunctionSource("syncWebTabFromUrl"),
+    "this.isLocalShellUrl = isLocalShellUrl;",
     "this.extractPrivateSearchDetails = extractPrivateSearchDetails;",
     "this.resolveVisibleWebUri = resolveVisibleWebUri;",
     "this.resolveShellAddressWebUri = resolveShellAddressWebUri;",
     "this.getTabBrowserUri = getTabBrowserUri;",
     "this.getPublicBrowserUri = getPublicBrowserUri;",
     "this.syncBrowserUrl = syncBrowserUrl;",
-    "this.submitPrivateSearchFromFrame = submitPrivateSearchFromFrame;"
+    "this.submitPrivateSearchFromFrame = submitPrivateSearchFromFrame;",
+    "this.syncWebTabFromUrl = syncWebTabFromUrl;"
   ].join("\n\n");
 
   vm.runInNewContext(script, context, { filename: "web-search-privacy-helpers.js" });
@@ -149,6 +178,35 @@ test("resolveVisibleWebUri leaves normal destinations unchanged", () => {
   assert.equal(visibleUrl, "https://example.com/docs");
   assert.equal(tab.searchProvider, "");
   assert.equal(tab.searchQuery, "");
+});
+
+test("isLocalShellUrl recognizes the current shell document without matching other same-origin pages", () => {
+  const { isLocalShellUrl } = loadPrivateSearchHelpers();
+
+  assert.equal(isLocalShellUrl("https://antarctic.games/"), true);
+  assert.equal(isLocalShellUrl("https://antarctic.games/index.html?uri=antarctic://home"), true);
+  assert.equal(isLocalShellUrl("https://antarctic.games/docs"), false);
+});
+
+test("syncWebTabFromUrl ignores shell bootstrap URLs when a remote site is already active", () => {
+  const context = loadPrivateSearchHelpers();
+  const tab = {
+    targetUrl: "https://duckduckgo.com/",
+    browserUri: "https://duckduckgo.com/",
+    uri: "best horror games",
+    title: "duckduckgo.com",
+    webState: {
+      currentTarget: "https://duckduckgo.com/",
+      pendingSearchQuery: "best horror games"
+    }
+  };
+
+  context.syncWebTabFromUrl(tab, "https://antarctic.games/?uri=best%20horror%20games");
+
+  assert.equal(tab.targetUrl, "https://duckduckgo.com/");
+  assert.equal(tab.browserUri, "https://duckduckgo.com/");
+  assert.equal(tab.uri, "best horror games");
+  assert.equal(context.renderShellCalls, 0);
 });
 
 test("submitPrivateSearchFromFrame populates the proxied search form before submitting", () => {

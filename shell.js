@@ -3864,6 +3864,57 @@
     }
   }
 
+  function getLocalShellDocumentPaths() {
+    var paths = [];
+    var pathname = "/";
+
+    try {
+      pathname = cleanText(window.location.pathname) || "/";
+    } catch (error) {
+      pathname = "/";
+    }
+
+    if (pathname.charAt(0) !== "/") {
+      pathname = "/" + pathname;
+    }
+
+    pushUniqueValue(paths, pathname);
+    pushUniqueValue(paths, "/");
+    pushUniqueValue(paths, "/index.html");
+
+    if (pathname !== "/" && /\/index\.html$/i.test(pathname)) {
+      pushUniqueValue(paths, pathname.replace(/index\.html$/i, "") || "/");
+    } else if (pathname !== "/" && pathname.charAt(pathname.length - 1) === "/") {
+      pushUniqueValue(paths, pathname + "index.html");
+    }
+
+    return paths;
+  }
+
+  function isLocalShellUrl(value) {
+    var raw = cleanText(value);
+    var origin = getProxyOrigin();
+    if (!raw || !origin) {
+      return false;
+    }
+
+    try {
+      var parsed = new URL(raw);
+      if (cleanText(parsed.origin) !== origin) {
+        return false;
+      }
+
+      var pathname = cleanText(parsed.pathname) || "/";
+      if (pathname.charAt(0) !== "/") {
+        pathname = "/" + pathname;
+      }
+
+      return getLocalShellDocumentPaths().indexOf(pathname) !== -1;
+    } catch (error) {
+      return false;
+    }
+  }
+
   function pushUniqueValue(list, value) {
     var normalized = cleanText(value);
     if (!normalized) return;
@@ -4590,6 +4641,9 @@
   function syncWebTabFromUrl(tab, value) {
     var nextUrl = decodeScramjetUrl(value);
     if (!nextUrl) return;
+    if (isLocalShellUrl(nextUrl) && !isLocalShellUrl(tab && tab.targetUrl)) {
+      return;
+    }
 
     tab.targetUrl = nextUrl;
     tab.browserUri = resolveVisibleWebUri(tab, nextUrl);
