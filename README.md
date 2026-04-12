@@ -70,6 +70,7 @@ npm run sync:frontend-proxy
 2. antarctic-games.netlify.app
 3. antarctic-gs.surge.sh
 4. antarctic-gs.vercel.app
+5. https://antarctic-gs.github.io/Antarctic-Games/
 
 ## Discord
 [Join our Discord Server for more updates!](https://discord.gg/FNACSCcE26)
