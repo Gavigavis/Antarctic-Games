@@ -67,6 +67,31 @@
     return Boolean(readStoredToken());
   }
 
+  function clearCachedCommunityState() {
+    cachedSession = undefined;
+    cachedBootstrap = undefined;
+    sessionRequest = null;
+    bootstrapRequest = null;
+  }
+
+  function syncCachedSessionWithStorage() {
+    var storedToken = readStoredToken();
+    var cachedToken = cleanText(cachedSession && cachedSession.token);
+
+    if (!storedToken) {
+      if (cachedSession !== undefined || cachedBootstrap !== undefined) {
+        setSessionFromPayload({ authenticated: false, user: null, token: "" });
+      }
+      return "";
+    }
+
+    if (cachedSession !== undefined && storedToken !== cachedToken) {
+      clearCachedCommunityState();
+    }
+
+    return storedToken;
+  }
+
   function emitSessionChange(session) {
     listeners.slice().forEach(function (listener) {
       try {
@@ -242,6 +267,26 @@
     return currentSession();
   }
 
+  function refreshSessionFromStorage() {
+    var storedToken = syncCachedSessionWithStorage();
+    if (!storedToken) {
+      return Promise.resolve(currentCommunityState());
+    }
+
+    if (
+      cachedSession &&
+      cachedSession.authenticated &&
+      cleanText(cachedSession.token) === storedToken &&
+      cachedSession.user
+    ) {
+      return Promise.resolve(currentCommunityState());
+    }
+
+    return getBootstrap(true).catch(function () {
+      return currentCommunityState();
+    });
+  }
+
   async function requestJson(pathValue, init) {
     var backendApi = getBackendApi();
     if (!backendApi || typeof backendApi.apiUrl !== "function") {
@@ -302,6 +347,7 @@
   }
 
   async function getSession(forceRefresh) {
+    syncCachedSessionWithStorage();
     if (!forceRefresh && cachedSession !== undefined) {
       return currentSession();
     }
@@ -331,6 +377,7 @@
   }
 
   async function getBootstrap(forceRefresh) {
+    syncCachedSessionWithStorage();
     if (!forceRefresh && cachedSession !== undefined && cachedBootstrap !== undefined) {
       return currentCommunityState();
     }
@@ -391,6 +438,16 @@
       emitSessionChange(currentSession());
     }
     return currentSession();
+  }
+
+  if (window && typeof window.addEventListener === "function") {
+    window.addEventListener("storage", function (event) {
+      var key = cleanText(event && event.key);
+      if (key && key !== STORAGE_KEY && key !== LEGACY_STORAGE_KEY) {
+        return;
+      }
+      refreshSessionFromStorage();
+    });
   }
 
   function requirePathSegment(value) {

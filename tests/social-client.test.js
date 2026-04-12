@@ -7,8 +7,8 @@ const vm = require("node:vm");
 const FRONTEND_DIR = path.resolve(__dirname, "..");
 const source = fs.readFileSync(path.join(FRONTEND_DIR, "social-client.js"), "utf8");
 
-function createStorageApi() {
-  const map = new Map();
+function createStorageApi(initialValues = {}) {
+  const map = new Map(Object.entries(initialValues).map(([key, value]) => [String(key), String(value)]));
   return {
     getItem(key) {
       return map.has(key) ? map.get(key) : "";
@@ -18,13 +18,16 @@ function createStorageApi() {
     },
     removeItem(key) {
       map.delete(String(key));
+    },
+    snapshot() {
+      return new Map(map);
     }
   };
 }
 
-function createClient(fetchImpl) {
-  const storage = createStorageApi();
-  const window = {
+function createWindow(storage) {
+  const listeners = new Map();
+  return {
     AntarcticGamesStorage: storage,
     AntarcticGamesBackend: {
       apiUrl(pathValue) {
@@ -37,20 +40,40 @@ function createClient(fetchImpl) {
       },
       setItem() {},
       removeItem() {}
+    },
+    addEventListener(type, listener) {
+      if (!listeners.has(type)) {
+        listeners.set(type, new Set());
+      }
+      listeners.get(type).add(listener);
+    },
+    removeEventListener(type, listener) {
+      if (!listeners.has(type)) {
+        return;
+      }
+      listeners.get(type).delete(listener);
+    },
+    dispatchStorageEvent(event) {
+      const callbacks = listeners.get("storage");
+      if (!callbacks) {
+        return;
+      }
+      Array.from(callbacks).forEach((listener) => listener(event));
     }
   };
+}
 
-  const context = {
-    console,
-    fetch: fetchImpl,
-    window
-  };
+function createClient(fetchImpl, options = {}) {
+  const storage = options.storage || createStorageApi();
+  const window = options.window || createWindow(storage);
+  const context = { console, fetch: fetchImpl, window };
 
   vm.runInNewContext(source, context, { filename: "social-client.js" });
 
   return {
     api: window.AntarcticSocialClient,
-    storage
+    storage,
+    window
   };
 }
 
@@ -62,6 +85,11 @@ function createJsonResponse(status, body) {
       return JSON.stringify(body);
     }
   };
+}
+
+async function flushAsyncWork() {
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
 }
 
 test("social client reuses the bootstrap payload returned by login", async () => {
@@ -190,6 +218,115 @@ test("social client short-circuits anonymous session and bootstrap checks withou
   assert.equal(bootstrap.bootstrap.threads.length, 0);
   assert.equal(bootstrap.bootstrap.incomingDirectRequests.length, 0);
   assert.equal(calls.length, 0);
+});
+
+test("social client refreshes stale anonymous cache after another tab stores a token", async () => {
+  const storage = createStorageApi();
+  const calls = [];
+  const { api } = createClient(async (url, init = {}) => {
+    calls.push({ url, init });
+    return createJsonResponse(200, {
+      ok: true,
+      authenticated: true,
+      token: "shared-snow-token",
+      user: {
+        id: 12,
+        username: "aurora",
+        createdAt: "2026-03-21T17:00:00.000Z"
+      },
+      bootstrap: {
+        threads: [{ id: 11, type: "room", name: "Aurora Lounge" }],
+        rooms: [{ id: 11, name: "Aurora Lounge", joined: true, memberCount: 3 }],
+        saves: [],
+        incomingDirectRequests: [],
+        stats: {
+          threadCount: 1,
+          roomCount: 1,
+          joinedRoomCount: 1,
+          directCount: 0,
+          incomingDirectRequestCount: 0,
+          saveCount: 0
+        }
+      }
+    });
+  }, { storage });
+
+  const anonymous = await api.getBootstrap();
+  assert.equal(anonymous.authenticated, false);
+  assert.equal(calls.length, 0);
+
+  storage.setItem("antarctic.account.session.v1", "shared-snow-token");
+
+  const refreshed = await api.getBootstrap();
+  assert.equal(refreshed.authenticated, true);
+  assert.equal(refreshed.user.username, "aurora");
+  assert.equal(refreshed.bootstrap.rooms.length, 1);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "https://api.example.test/api/community/bootstrap");
+  assert.equal(calls[0].init.headers["x-antarctic-session"], "shared-snow-token");
+});
+
+test("social client syncs active listeners when another tab changes auth storage", async () => {
+  const storage = createStorageApi();
+  const calls = [];
+  const { api, window } = createClient(async (url, init = {}) => {
+    calls.push({ url, init });
+    return createJsonResponse(200, {
+      ok: true,
+      authenticated: true,
+      token: "shared-ice-token",
+      user: {
+        id: 13,
+        username: "glacier",
+        createdAt: "2026-03-21T17:05:00.000Z"
+      },
+      bootstrap: {
+        threads: [{ id: 19, type: "direct", peer: { username: "snowfox" } }],
+        rooms: [],
+        saves: [],
+        incomingDirectRequests: [],
+        stats: {
+          threadCount: 1,
+          roomCount: 0,
+          joinedRoomCount: 0,
+          directCount: 1,
+          incomingDirectRequestCount: 0,
+          saveCount: 0
+        }
+      }
+    });
+  }, { storage });
+
+  const updates = [];
+  api.onSessionChange((session) => {
+    updates.push(session);
+  });
+
+  await api.getBootstrap();
+  storage.setItem("antarctic.account.session.v1", "shared-ice-token");
+  window.dispatchStorageEvent({
+    key: "antarctic.account.session.v1",
+    oldValue: "",
+    newValue: "shared-ice-token"
+  });
+
+  await flushAsyncWork();
+
+  assert.equal(calls.length, 1);
+  assert.equal(updates.at(-1).authenticated, true);
+  assert.equal(updates.at(-1).user.username, "glacier");
+
+  storage.removeItem("antarctic.account.session.v1");
+  window.dispatchStorageEvent({
+    key: "antarctic.account.session.v1",
+    oldValue: "shared-ice-token",
+    newValue: ""
+  });
+
+  await flushAsyncWork();
+
+  assert.equal(updates.at(-1).authenticated, false);
+  assert.equal(updates.at(-1).token, "");
 });
 
 test("social client sends room visibility and invite usernames when creating a room", async () => {
