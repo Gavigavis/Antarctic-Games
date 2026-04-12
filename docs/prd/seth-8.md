@@ -3,13 +3,13 @@
 Source: Linear issue `SETH-8` and linked document `74b381aa-818f-4675-90e7-5fcd4505de10`
 
 ## Execution Status
-- Last updated: 2026-04-12 17:27 EDT
+- Last updated: 2026-04-12 17:28 EDT
 - Current branch/worktree: `feature/deliver-prd-seth-8-shell-polish-20260412-171704` at `/Users/seth/.codex/worktrees/deliver-prd-seth-8-shell-polish-20260412-171704`
 - Active phase: `Phase 2 - verification and docs`
-- Active task: `Update Linear, stage, and commit the verified delivery branch`
-- Next task: `Request approval before pushing the new remote branch`
+- Active task: `Await approval to push the verified delivery branch`
+- Next task: `Push branch, open the remote handoff, and mark the Linear source complete`
 - Overall: `8/9` tasks complete
-- Verification: `npm run verify`
+- Verification: `npm run verify` and local commit `b5395d9`
 
 ## Goals
 - Replace stale proxy-disabled messaging with ready-state fallback proxy wording.
