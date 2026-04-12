@@ -98,6 +98,7 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /function resolveVisibleWebUri\(tab, targetUrl\)/);
   assert.match(shellScript, /function submitPrivateSearchFromFrame\(frame, query\)/);
   assert.match(shellScript, /function schedulePrivateSearchSubmission\(tab, frame, attempt\)/);
+  assert.match(shellScript, /function shouldAutofillPrivateSearch\(tab, loadedUrl\)/);
   assert.match(shellScript, /function appendLocalAssetVersion\(resolvedUrl\)/);
   assert.match(shellScript, /function appendProxyRuntimeAssetVersion\(value\)/);
   assert.match(shellScript, /function resolveProxyRequestUrl\(config\)/);
@@ -157,7 +158,7 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /PROXY_DISABLED_MESSAGE/);
   assert.match(shellScript, /runtime\.controller\.createFrame\(frame\)/);
   assert.match(shellScript, /renderDisabledWebPane\(tab, tab\.paneEl, PROXY_BOOT_MESSAGE\)/);
-  assert.match(shellScript, /schedulePrivateSearchSubmission\(tab, frame, 1\)/);
+  assert.match(shellScript, /if \(shouldAutofillPrivateSearch\(tab, loadedUrl\)\) \{\s*schedulePrivateSearchSubmission\(tab, frame, 1\);/);
   assert.match(shellScript, /setProxyHealth\(\s*true,\s*runtime\.transportMode === "wisp"/);
   assert.match(shellScript, /setProxyHealth\(false, PROXY_IDLE_MESSAGE, "Standby"\)/);
   assert.match(shellScript, /data-game-save="1"/);

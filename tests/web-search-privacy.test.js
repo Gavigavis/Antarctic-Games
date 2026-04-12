@@ -82,6 +82,7 @@ function loadPrivateSearchHelpers() {
     extractFunctionSource("syncWebTabFromUrl"),
     extractFunctionSource("getLoadedWebPaneUrl"),
     extractFunctionSource("shouldRevealWebPane"),
+    extractFunctionSource("shouldAutofillPrivateSearch"),
     "this.isLocalShellUrl = isLocalShellUrl;",
     "this.extractPrivateSearchDetails = extractPrivateSearchDetails;",
     "this.resolveVisibleWebUri = resolveVisibleWebUri;",
@@ -92,7 +93,8 @@ function loadPrivateSearchHelpers() {
     "this.submitPrivateSearchFromFrame = submitPrivateSearchFromFrame;",
     "this.syncWebTabFromUrl = syncWebTabFromUrl;",
     "this.getLoadedWebPaneUrl = getLoadedWebPaneUrl;",
-    "this.shouldRevealWebPane = shouldRevealWebPane;"
+    "this.shouldRevealWebPane = shouldRevealWebPane;",
+    "this.shouldAutofillPrivateSearch = shouldAutofillPrivateSearch;"
   ].join("\n\n");
 
   vm.runInNewContext(script, context, { filename: "web-search-privacy-helpers.js" });
@@ -243,6 +245,20 @@ test("shouldRevealWebPane keeps the bootstrap shell hidden until a real page loa
   assert.equal(shouldRevealWebPane(externalTab, "https://antarctic.games/?uri=best%20horror%20games"), false);
   assert.equal(shouldRevealWebPane(externalTab, "https://example.com/docs"), true);
   assert.equal(shouldRevealWebPane(localTab, "https://antarctic.games/"), true);
+});
+
+test("shouldAutofillPrivateSearch keeps pending searches moving through the hidden bootstrap shell", () => {
+  const { shouldAutofillPrivateSearch } = loadPrivateSearchHelpers();
+  const tab = {
+    targetUrl: "https://duckduckgo.com/",
+    webState: {
+      pendingSearchQuery: "best horror games"
+    }
+  };
+
+  assert.equal(shouldAutofillPrivateSearch(tab, "https://antarctic.games/?uri=best%20horror%20games"), true);
+  assert.equal(shouldAutofillPrivateSearch(tab, "https://duckduckgo.com/?q=best+horror+games"), true);
+  assert.equal(shouldAutofillPrivateSearch({ webState: { pendingSearchQuery: "" } }, "https://antarctic.games/"), false);
 });
 
 test("submitPrivateSearchFromFrame populates the proxied search form before submitting", () => {

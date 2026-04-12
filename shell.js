@@ -4680,6 +4680,24 @@
     return isLocalShellUrl(tab && tab.targetUrl);
   }
 
+  function shouldAutofillPrivateSearch(tab, loadedUrl) {
+    var query = cleanText(tab && tab.webState && tab.webState.pendingSearchQuery);
+    if (!query) {
+      return false;
+    }
+
+    var nextUrl = cleanText(loadedUrl);
+    if (!nextUrl || isLocalShellUrl(nextUrl)) {
+      return true;
+    }
+
+    try {
+      return isDuckDuckGoHost(new URL(nextUrl).hostname);
+    } catch (error) {
+      return false;
+    }
+  }
+
   function navigateWebPane(tab, force) {
     if (!tab || tab.view !== "web" || !tab.webState || !tab.webState.frameController) return;
     var targetUrl = cleanText(tab.targetUrl);
@@ -4710,7 +4728,7 @@
         var loadedUrl = getLoadedWebPaneUrl(tab, frame);
         var revealFrame = shouldRevealWebPane(tab, loadedUrl);
         clearPendingWebSearch(tab);
-        if (revealFrame && tab.webState.pendingSearchQuery) {
+        if (shouldAutofillPrivateSearch(tab, loadedUrl)) {
           schedulePrivateSearchSubmission(tab, frame, 1);
         }
         if (loadedUrl) {
