@@ -68,15 +68,10 @@ npm run sync:frontend-proxy
 ```
 
 ## Links
-  1. https://sethpang.com (main link)
-  2. https://palladium-games.netlify.app
-  3. http://bakzz05.surge.sh
-  4. https://i-am-diddy.netlify.app (don't ask)
-  5. https://sethisdiddy.netlify.app (shut up @Gavigavis)
-  6. https://palladium-games-1yia8ysxb-vegeta-bles-projects.vercel.app/
-  7. https://palladium-games.onrender.com
-  8. https://palladium-games.pages.dev
-  9. https://palladium-games-blush.vercel.app/index.html (i didn't even know about this link)  
+1. antarctic.games
+2. antarctic-games.netlify.app
+3. antarctic-gs.surge.sh
+4. antarctic-gs.vercel.app
 
 ## Discord
 [Join our Discord Server for more updates!](https://discord.gg/FNACSCcE26)
