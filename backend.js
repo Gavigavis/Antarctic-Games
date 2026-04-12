@@ -6,6 +6,20 @@
   var DEFAULT_BACKEND_BASE = "https://api.antarctic.games";
   var NETLIFY_BACKEND_BRIDGE = "https://antarctic-games.netlify.app";
 
+  function currentHost() {
+    return String(window.location.hostname || "").toLowerCase();
+  }
+
+  function shouldUseHostedOrigin() {
+    var host = currentHost();
+    return (
+      host === "antarctic.games" ||
+      host === "www.antarctic.games" ||
+      host === "api.antarctic.games" ||
+      host === "www.api.antarctic.games"
+    );
+  }
+
   function normalizeBase(value) {
     var raw = String(value || "").trim();
     if (!raw) return "";
@@ -33,20 +47,16 @@
     if (/^https?:\/\/(?:www\.)?api\.sethpang\.com$/i.test(normalized)) {
       return DEFAULT_BACKEND_BASE;
     }
-    if (shouldUseNetlifyBridge()) {
-      if (/^https?:\/\/(?:www\.)?api\.antarctic\.games$/i.test(normalized)) {
-        return NETLIFY_BACKEND_BRIDGE;
-      }
-      if (/^https?:\/\/(?:www\.)?antarctic\.games$/i.test(normalized)) {
-        return NETLIFY_BACKEND_BRIDGE;
+    if (shouldUseHostedOrigin()) {
+      if (
+        /^https?:\/\/(?:www\.)?api\.antarctic\.games$/i.test(normalized) ||
+        /^https?:\/\/(?:www\.)?antarctic\.games$/i.test(normalized) ||
+        /^https?:\/\/antarctic-games\.netlify\.app$/i.test(normalized)
+      ) {
+        return window.location.origin;
       }
     }
     return normalized;
-  }
-
-  function shouldUseNetlifyBridge() {
-    var host = String(window.location.hostname || "").toLowerCase();
-    return host === "antarctic.games" || host === "www.antarctic.games";
   }
 
   function fromQuery() {
@@ -95,7 +105,7 @@
   }
 
   function inferDefaultBase() {
-    var host = String(window.location.hostname || "").toLowerCase();
+    var host = currentHost();
     if (!host) return "";
     if (host === "localhost" || host === "127.0.0.1" || host === "::1" || window.location.port === "3000") {
       return window.location.origin;
@@ -103,8 +113,8 @@
     if (/\.netlify\.app$/i.test(host)) {
       return window.location.origin;
     }
-    if (shouldUseNetlifyBridge()) {
-      return NETLIFY_BACKEND_BRIDGE;
+    if (shouldUseHostedOrigin()) {
+      return window.location.origin;
     }
     if (host === "api.antarctic.games" || host === "www.api.antarctic.games") {
       return window.location.origin;

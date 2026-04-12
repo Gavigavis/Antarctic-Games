@@ -90,12 +90,12 @@ test("backend helper prefers same-origin API routes on Netlify frontends", () =>
   assert.equal(api.getBaseUrl(), "https://antarctic-games.netlify.app");
 });
 
-test("backend helper routes antarctic.games through the Netlify API bridge", () => {
+test("backend helper keeps production antarctic.games on the live same-origin backend", () => {
   const { api } = loadBackendApi({
     origin: "https://www.antarctic.games"
   });
 
-  assert.equal(api.getBaseUrl(), "https://antarctic-games.netlify.app");
+  assert.equal(api.getBaseUrl(), "https://www.antarctic.games");
 });
 
 test("backend helper migrates old saved backend hosts to api.antarctic.games", () => {
@@ -110,7 +110,7 @@ test("backend helper migrates old saved backend hosts to api.antarctic.games", (
   assert.equal(localStorage.getItem("antarctic-backend-base"), "https://api.antarctic.games");
 });
 
-test("backend helper migrates api.antarctic.games to the Netlify bridge on antarctic.games", () => {
+test("backend helper migrates old saved backend hosts back onto antarctic.games", () => {
   const { api, localStorage } = loadBackendApi({
     origin: "https://www.antarctic.games",
     localStorage: {
@@ -118,8 +118,20 @@ test("backend helper migrates api.antarctic.games to the Netlify bridge on antar
     }
   });
 
-  assert.equal(api.getBaseUrl(), "https://antarctic-games.netlify.app");
-  assert.equal(localStorage.getItem("antarctic-backend-base"), "https://antarctic-games.netlify.app");
+  assert.equal(api.getBaseUrl(), "https://www.antarctic.games");
+  assert.equal(localStorage.getItem("antarctic-backend-base"), "https://www.antarctic.games");
+});
+
+test("backend helper migrates the old Netlify bridge back onto antarctic.games", () => {
+  const { api, localStorage } = loadBackendApi({
+    origin: "https://antarctic.games",
+    localStorage: {
+      "antarctic-backend-base": "https://antarctic-games.netlify.app"
+    }
+  });
+
+  assert.equal(api.getBaseUrl(), "https://antarctic.games");
+  assert.equal(localStorage.getItem("antarctic-backend-base"), "https://antarctic.games");
 });
 
 test("backend helper migrates old query overrides to api.antarctic.games", () => {
