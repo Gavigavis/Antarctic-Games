@@ -63,14 +63,16 @@ test("filterCatalog narrows the library without mutating the source list", () =>
   assert.deepEqual(sampleGames.map((game) => game.title), ["OvO", "Brotato"]);
 });
 
-test("pickFeaturedGame stays stable and prefers entries with artwork", () => {
+test("pickFeaturedGame rotates daily and prefers entries with artwork", () => {
   const { api } = createHelperContext();
   const sampleGames = [
     { title: "No Image Yet", path: "games/misc/no-image.html" },
-    { title: "Featured Pick", image: "images/game-img/featured-pick.png", path: "games/misc/featured-pick.html" }
+    { title: "Beta Feature", image: "images/game-img/beta.png", path: "games/misc/beta.html" },
+    { title: "Arcade Hero", image: "images/game-img/arcade-hero.png", path: "games/misc/arcade-hero.html" }
   ];
 
-  assert.equal(api.pickFeaturedGame(sampleGames), sampleGames[1]);
+  assert.equal(api.pickFeaturedGame(sampleGames, "2026-04-12T10:00:00Z"), sampleGames[1]);
+  assert.equal(api.pickFeaturedGame(sampleGames, "2026-04-13T10:00:00Z"), sampleGames[2]);
   assert.equal(api.pickFeaturedGame([]), null);
 });
 

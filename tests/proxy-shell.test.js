@@ -42,7 +42,8 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellPage, /<script src="social-client\.js\?v=2026-03-30-bridge-2"><\/script>/);
   assert.match(shellPage, /<script src="baremux\/index\.js\?v=2026-03-30-bridge-2"><\/script>/);
   assert.match(shellPage, /<script src="scram\/scramjet\.all\.js\?v=2026-03-30-bridge-2"><\/script>/);
-  assert.match(shellPage, /Preparing built-in web browsing/);
+  assert.match(shellPage, /Preparing the fallback web proxy/);
+  assert.match(shellPage, /ready fallback proxy when you open a page/);
   assert.match(shellPage, /<script src="data\/games-catalog\.js\?v=2026-03-30-bridge-2" data-antarctic-games-catalog="true" data-palladium-games-catalog="true"><\/script>/);
   assert.match(shellPage, /antarctic:\/\/settings/);
   assert.match(shellPage, /antarctic:\/\/account/);
@@ -67,6 +68,8 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellPage, /data-role="chat-message-counter"/);
   assert.match(shellPage, /maxlength="2000"/);
   assert.match(shellPage, /Send DM request/);
+  assert.doesNotMatch(shellPage, /data-chat-wizard-back/);
+  assert.doesNotMatch(shellPage, /data-chat-wizard-next/);
   assert.match(shellPage, /prompt-list--composer/);
   assert.doesNotMatch(shellPage, /data-account-wizard-next/);
   assert.doesNotMatch(shellPage, /data-role="ai-status"/);
@@ -124,7 +127,6 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /function applyChatPaneMode\(tab, pane\)/);
   assert.match(shellScript, /function filterThreadsForChatMode\(threads, tab\)/);
   assert.match(shellScript, /var next = Math\.max\(2, Math\.min\(CHAT_WIZARD_STEPS, step\)\);/);
-  assert.match(shellScript, /if \(backBtn\) backBtn\.hidden = next <= 2;/);
   assert.match(shellScript, /if \(nextBtn\) nextBtn\.hidden = true;/);
   assert.match(shellScript, /if \(\(tab\.chatState\.wizardStep \|\| 2\) < 2\) \{\s*setChatWizardStep\(tab, pane, 2\);/);
   assert.match(shellScript, /incomingDirectRequestCount/);
@@ -147,7 +149,8 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /accountState:\s*\{\s*allowAutoOpen:\s*true\s*\}/);
   assert.match(shellScript, /if \(tab && tab\.accountState\) \{\s*tab\.accountState\.allowAutoOpen = true;\s*\}/);
   assert.match(shellScript, /if \(tab && pane && tab\.accountState && tab\.accountState\.allowAutoOpen\) \{\s*setAccountWizardStep\(tab, pane, 2\);\s*tab\.accountState\.allowAutoOpen = false;\s*\}/);
-  assert.match(shellScript, /if \(current === 3\) \{\s*tab\.chatState\.activeThreadId = "";\s*setChatWizardStep\(tab, pane, 2\);/);
+  assert.match(shellScript, /function navigateToolbarBack\(active\)/);
+  assert.match(shellScript, /if \(navigateToolbarBack\(getActiveTab\(\)\)\) \{\s*return;\s*\}/);
   assert.doesNotMatch(shellScript, /if \(!tab\.chatState\.activeThreadId && threads\.length\) \{\s*tab\.chatState\.activeThreadId = String\(threads\[0\]\.id\);\s*\}/);
   assert.match(shellScript, /legacy shortcut to chats/);
   assert.match(shellScript, /socialApi\.getBootstrap\(Boolean\(forceRefresh\)\)/);
@@ -157,7 +160,10 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(shellScript, /function disableProxyRuntime\(\)/);
   assert.match(shellScript, /PROXY_DISABLED_MESSAGE/);
   assert.match(shellScript, /runtime\.controller\.createFrame\(frame\)/);
-  assert.match(shellScript, /renderDisabledWebPane\(tab, tab\.paneEl, PROXY_BOOT_MESSAGE\)/);
+  assert.match(shellScript, /renderDisabledWebPane\(tab, tab\.paneEl, PROXY_BOOT_MESSAGE, "Preparing the fallback web proxy\."\)/);
+  assert.match(shellScript, /PROXY_BOOT_MESSAGE = "Connecting the ready fallback proxy\.\.\."/);
+  assert.match(shellScript, /PROXY_IDLE_MESSAGE = "Antarctic will connect the ready fallback proxy when you open a page\."/);
+  assert.match(shellScript, /data-role="web-status-title"/);
   assert.match(shellScript, /if \(shouldAutofillPrivateSearch\(tab, loadedUrl\)\) \{\s*schedulePrivateSearchSubmission\(tab, frame, 1\);/);
   assert.match(shellScript, /setProxyHealth\(\s*true,\s*runtime\.transportMode === "wisp"/);
   assert.match(shellScript, /setProxyHealth\(false, PROXY_IDLE_MESSAGE, "Standby"\)/);
@@ -223,6 +229,7 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.match(gamesHelper, /var LOCAL_MANIFEST_ASSET_PARAM = "antarctic_asset"/);
   assert.match(gamesHelper, /var LOCAL_MANIFEST_VERSION = "2026-03-22-asset-1"/);
   assert.match(gamesHelper, /function resolveCatalogScriptUrl\(\)/);
+  assert.match(gamesHelper, /function resolveFeaturedRotationIndex\(size, rawDate\)/);
   assert.match(gamesHelper, /script\.src = resolveCatalogScriptUrl\(\);/);
   assert.match(gamesHelper, /manifestUrl\.searchParams\.set\(LOCAL_MANIFEST_ASSET_PARAM, LOCAL_MANIFEST_VERSION\)/);
   assert.match(socialClient, /function getBootstrap\(forceRefresh\)/);
