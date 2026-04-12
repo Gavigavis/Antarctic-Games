@@ -76,10 +76,10 @@ npm run sync:frontend-proxy
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=Palladium-Games%2FPalladium-Games&type=date&legend=bottom-right">
+<a href="https://www.star-history.com/?repos=Antarctic-GS%2FAntarctic-Games&type=date&legend=bottom-right">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Palladium-Games/Palladium-Games&type=date&theme=dark&legend=bottom-right" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Palladium-Games/Palladium-Games&type=date&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Palladium-Games/Palladium-Games&type=date&legend=bottom-right" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Antarctic-GS/Antarctic-Games&type=date&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Antarctic-GS/Antarctic-Games&type=date&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Antarctic-GS/Antarctic-Games&type=date&legend=bottom-right" />
  </picture>
 </a>
