@@ -1,7 +1,7 @@
 window.ANTARCTIC_GAMES_CATALOG = {
   "ok": true,
   "source": "local-sync",
-  "generatedAt": "2026-03-19T21:03:34.328Z",
+  "generatedAt": "2026-04-12T14:04:54.689Z",
   "games": [
     {
       "file": "achievement-unlocked.html",
@@ -20,6 +20,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "path": "games/platformer/achievement-unlocked-2.html",
       "image": "images/game-img/achievement-unlocked.png",
       "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fachievement-unlocked-2.html&title=Achievement%20Unlocked%202&author=Revelance%20Match"
+    },
+    {
+      "file": "achievement-unlocked-3.html",
+      "title": "Achievement Unlocked 3",
+      "author": "jmtb02",
+      "category": "Platformer",
+      "path": "games/platformer/achievement-unlocked-3.html",
+      "image": "images/game-img/achievement-unlocked-3.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fachievement-unlocked-3.html&title=Achievement%20Unlocked%203&author=jmtb02"
     },
     {
       "file": "adventure-capitalist.html",
@@ -74,6 +83,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "path": "games/others/blockblast.html",
       "image": "images/game-img/blockblast.png",
       "launchUri": "antarctic://gamelauncher?path=games%2Fothers%2Fblockblast.html&title=Block%20Blast&author=reunbozdo"
+    },
+    {
+      "file": "bowmasters.html",
+      "title": "Bowmasters",
+      "author": "Azur Games, Playgendary",
+      "category": "Action",
+      "path": "games/action/bowmasters.html",
+      "image": "images/game-img/bowmasters.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Faction%2Fbowmasters.html&title=Bowmasters&author=Azur%20Games%2C%20Playgendary"
     },
     {
       "file": "brotato.html",
@@ -327,7 +345,7 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "image": "images/game-img/snow-rider.png",
       "launchUri": "antarctic://gamelauncher?path=games%2Fracing%2Fsnow-rider.html&title=Snow%20Rider&author=drippy-cat"
     },
-        {
+    {
       "file": "survivor-io.html",
       "title": "Survivor.io",
       "author": "Mad Kid Games",

@@ -14,8 +14,10 @@
   var LOCAL_APP_ASSET_PARAM = "antarctic_asset";
   var LOCAL_APP_ASSET_VERSION = "2026-03-22-asset-1";
   var PROXY_RUNTIME_ASSET_VERSION = "2026-03-23-proxy-5";
-  var PROXY_DISABLED_MESSAGE = "Built-in web browsing is temporarily disabled right now.";
+  var PROXY_DISABLED_MESSAGE = "Web browsing could not start right now.";
   var PROXY_IDLE_MESSAGE = "Web browsing will connect when you open a page.";
+  var PROXY_BOOT_MESSAGE = "Connecting the web browsing runtime...";
+  var PROXY_WISP_PROBE_TIMEOUT_MS = 900;
   var SHELL_SCALE_MIN = 0.78;
   var PRIVATE_SEARCH_AUTOFILL_RETRY_MS = 180;
   var PRIVATE_SEARCH_AUTOFILL_MAX_ATTEMPTS = 12;
@@ -3196,8 +3198,8 @@
     copyEl.textContent = detail
       ? detail
       : targetUrl
-      ? 'The requested page "' + targetUrl + '" cannot be loaded inside Antarctic right now.'
-      : "Games, chats, AI, and account features still work normally.";
+      ? 'Antarctic is preparing "' + targetUrl + '" inside the built-in proxy.'
+      : PROXY_IDLE_MESSAGE;
   }
 
   function renderEnabledWebPane(pane) {
@@ -3221,6 +3223,23 @@
       state.config = config || state.config;
       return config || {};
     });
+  }
+
+  function logProxyBootstrapEvent(type, detail) {
+    if (!window.console || typeof window.console.info !== "function") {
+      return;
+    }
+
+    var payload = {
+      event: cleanText(type) || "proxy_bootstrap",
+      timestamp: new Date().toISOString()
+    };
+    if (detail && typeof detail === "object") {
+      Object.keys(detail).forEach(function (key) {
+        payload[key] = detail[key];
+      });
+    }
+    window.console.info("[antarctic-proxy]", payload);
   }
 
   function normalizeBase(value) {
@@ -3390,6 +3409,73 @@
     return collected;
   }
 
+  function determineProxyBootstrapPlan(options) {
+    var declaredTransport = cleanText(options && options.declaredTransport).toLowerCase();
+    var proxyFetchUrl = cleanText(options && options.proxyFetchUrl);
+    var proxyRequestUrl = cleanText(options && options.proxyRequestUrl);
+    var wispUrl = cleanText(options && options.wispUrl);
+    var hasHttpTransport = Boolean(proxyRequestUrl || proxyFetchUrl);
+    var hasWispTransport = Boolean(wispUrl);
+
+    if ((declaredTransport === "disabled" || declaredTransport === "off") && (hasHttpTransport || hasWispTransport)) {
+      return {
+        contractMismatch: true,
+        declaredTransport: declaredTransport || "disabled",
+        hasHttpTransport: hasHttpTransport,
+        hasWispTransport: hasWispTransport,
+        preferredTransport: hasHttpTransport ? "http-fallback" : "wisp"
+      };
+    }
+
+    if (declaredTransport === "http-fallback" && hasHttpTransport) {
+      return {
+        contractMismatch: false,
+        declaredTransport: declaredTransport,
+        hasHttpTransport: true,
+        hasWispTransport: hasWispTransport,
+        preferredTransport: "http-fallback"
+      };
+    }
+
+    if (declaredTransport === "wisp" && hasWispTransport) {
+      return {
+        contractMismatch: false,
+        declaredTransport: declaredTransport,
+        hasHttpTransport: hasHttpTransport,
+        hasWispTransport: true,
+        preferredTransport: "wisp"
+      };
+    }
+
+    if (hasHttpTransport) {
+      return {
+        contractMismatch: false,
+        declaredTransport: declaredTransport,
+        hasHttpTransport: true,
+        hasWispTransport: hasWispTransport,
+        preferredTransport: "http-fallback"
+      };
+    }
+
+    if (hasWispTransport) {
+      return {
+        contractMismatch: false,
+        declaredTransport: declaredTransport,
+        hasHttpTransport: false,
+        hasWispTransport: true,
+        preferredTransport: "wisp"
+      };
+    }
+
+    return {
+      contractMismatch: false,
+      declaredTransport: declaredTransport,
+      hasHttpTransport: false,
+      hasWispTransport: false,
+      preferredTransport: ""
+    };
+  }
+
   function getProxyStatusText(response) {
     if (!response || !response.headers || typeof response.headers.get !== "function") {
       return "";
@@ -3410,7 +3496,7 @@
     return new Promise(function (resolve) {
       var settled = false;
       var socket = null;
-      var timer = window.setTimeout(finishFalse, 2200);
+      var timer = window.setTimeout(finishFalse, PROXY_WISP_PROBE_TIMEOUT_MS);
 
       function cleanup() {
         if (timer) {
@@ -3491,6 +3577,14 @@
           }).then(function (response) {
             var responseHeaders = collectProxyResponseHeaders(response.headers);
             var status = Number(response.status || 502);
+            if (status >= 500) {
+              logProxyBootstrapEvent("upstream_proxy_failure", {
+                method: normalizedMethod,
+                status: status,
+                target: remote.toString(),
+                transport: "http-fallback"
+              });
+            }
             if ([101, 204, 205, 304].indexOf(status) !== -1 || normalizedMethod === "HEAD") {
               return {
                 body: undefined,
@@ -3508,6 +3602,14 @@
                 statusText: getProxyStatusText(response)
               };
             });
+          }).catch(function (error) {
+            logProxyBootstrapEvent("upstream_proxy_failure", {
+              error: cleanText(error && error.message ? error.message : error),
+              method: normalizedMethod,
+              target: remote.toString(),
+              transport: "http-fallback"
+            });
+            throw error;
           });
         }
 
@@ -3528,6 +3630,14 @@
         }).then(function (response) {
           var responseHeaders = collectProxyResponseHeaders(response.headers);
           var status = Number(response.status || 502);
+          if (status >= 500) {
+            logProxyBootstrapEvent("upstream_proxy_failure", {
+              method: normalizedMethod,
+              status: status,
+              target: remote.toString(),
+              transport: "http-fallback"
+            });
+          }
           if ([101, 204, 205, 304].indexOf(status) !== -1) {
             return {
               body: undefined,
@@ -3545,6 +3655,14 @@
               statusText: getProxyStatusText(response)
             };
           });
+        }).catch(function (error) {
+          logProxyBootstrapEvent("upstream_proxy_failure", {
+            error: cleanText(error && error.message ? error.message : error),
+            method: normalizedMethod,
+            target: remote.toString(),
+            transport: "http-fallback"
+          });
+          throw error;
         });
       },
       connect: function (remote, protocols, requestHeaders, onopen, onmessage, onclose, onerror) {
@@ -4039,6 +4157,10 @@
     if (!silent) {
       setProxyHealth(false, "Resetting proxy storage and retrying...", "Repairing");
     }
+    logProxyBootstrapEvent("controller_bootstrap_repair", {
+      reason: resetControllerBudget ? "controller-unavailable" : "storage-reset",
+      silent: silent
+    });
 
     state.proxyRuntime.repairPromise = closeProxyRuntimeHandles().then(function () {
       return unregisterProxyServiceWorkers();
@@ -4084,9 +4206,21 @@
     var wispUrl = resolveWispUrl(config);
     var proxyFetchUrl = resolveProxyFetchUrl(config);
     var proxyRequestUrl = resolveProxyRequestUrl(config);
+    var bootstrapPlan = determineProxyBootstrapPlan({
+      declaredTransport: config && config.services && (config.services.proxyTransport || config.services.proxyMode),
+      proxyFetchUrl: proxyFetchUrl,
+      proxyRequestUrl: proxyRequestUrl,
+      wispUrl: wispUrl
+    });
     var httpTransportUrl = proxyRequestUrl || proxyFetchUrl;
-    if (!wispUrl && !httpTransportUrl) {
+    if (!bootstrapPlan.hasWispTransport && !bootstrapPlan.hasHttpTransport) {
       return Promise.reject(new Error("No backend proxy transport is configured."));
+    }
+    if (bootstrapPlan.contractMismatch) {
+      logProxyBootstrapEvent("config_mismatch", {
+        declaredTransport: bootstrapPlan.declaredTransport,
+        recoveredTransport: bootstrapPlan.preferredTransport
+      });
     }
 
     if (!window.BareMux || typeof window.BareMux.BareMuxConnection !== "function") {
@@ -4106,10 +4240,15 @@
 
       return controller.init().then(function () {
         var mux = new window.BareMux.BareMuxConnection(appendProxyRuntimeAssetVersion(BAREMUX_WORKER_PATH));
-        function activateHttpFallback() {
+        function activateHttpFallback(reason) {
           if (!httpTransportUrl) {
             return Promise.reject(new Error("No backend HTTP proxy endpoints are configured."));
           }
+          logProxyBootstrapEvent("fallback_activation", {
+            reason: cleanText(reason) || "http-fallback",
+            target: httpTransportUrl || "antarctic-http-fallback",
+            transport: "http-fallback"
+          });
           return mux
             .setRemoteTransport(createHttpProxyTransport(config), httpTransportUrl || "antarctic-http-fallback")
             .then(function () {
@@ -4120,12 +4259,27 @@
               return state.proxyRuntime;
             });
         }
-        if (!wispUrl) {
-          return activateHttpFallback();
+        if (bootstrapPlan.preferredTransport === "http-fallback" || !bootstrapPlan.hasWispTransport) {
+          return activateHttpFallback(
+            bootstrapPlan.preferredTransport === "http-fallback" ? "preferred-http-fallback" : "no-wisp-transport"
+          );
         }
+        logProxyBootstrapEvent("transport_probe_start", {
+          transport: "wisp",
+          wispUrl: wispUrl
+        });
+        var probeStartedAt = Date.now();
         return probeWispTransport(wispUrl).then(function (wispReachable) {
+          var probeDurationMs = Date.now() - probeStartedAt;
+          if (probeDurationMs >= 750) {
+            logProxyBootstrapEvent("transport_probe_delay", {
+              durationMs: probeDurationMs,
+              reachable: wispReachable,
+              transport: "wisp"
+            });
+          }
           if (!wispReachable) {
-            return activateHttpFallback();
+            return activateHttpFallback("wisp-unreachable");
           }
           return mux
             .setTransport(appendProxyRuntimeAssetVersion(LIBCURL_TRANSPORT_PATH), [{ wisp: wispUrl }])
@@ -4136,10 +4290,10 @@
               state.proxyRuntime.transportUrl = wispUrl;
               return state.proxyRuntime;
             }, function () {
-              return activateHttpFallback();
+              return activateHttpFallback("wisp-init-failed");
             });
         }, function () {
-          return activateHttpFallback();
+          return activateHttpFallback("wisp-probe-failed");
         });
       });
     }).catch(function (error) {
@@ -4465,8 +4619,8 @@
     var frame = tab.paneEl.querySelector("iframe.shell-pane__frame");
     if (!frame) return;
 
-    renderDisabledWebPane(tab, tab.paneEl, "Connecting the web browsing runtime...");
-    setProxyHealth(false, "Connecting the web browsing runtime...", "Starting");
+    renderDisabledWebPane(tab, tab.paneEl, PROXY_BOOT_MESSAGE);
+    setProxyHealth(false, PROXY_BOOT_MESSAGE, "Starting");
 
     if (!frame.__antarcticWebLoadBound) {
       frame.__antarcticWebLoadBound = true;
