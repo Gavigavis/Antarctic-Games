@@ -1,8 +1,8 @@
 # Antarctic Games
 
 ## Our Purpose
-Our purpose is to provide gaming fun to everybody who is probably sitting bored in a classroom while their teacher drones on about the Civil War.
-The frontend is now a single-shell browser experience where the main page is the proxy and internal routes like `antarctic://home`, `antarctic://games`, and `antarctic://ai` live inside the built-in address bar.
+Our purpose is to provide gaming fun to everybody who is probably sitting bored in a classroom while their teacher drones on about the Civil War.  
+
 We have games, an AI agent, and a built-in proxy shell.
 ## Our Tech Infrastructure
 We use games from [GN-MATH](https://gn-math.dev), and the [Internet Archive](https://archive.org)
@@ -18,25 +18,15 @@ You can also remix this on [Replit](https://replit.com/@sethpanng/Palladium-Game
 
 
   1. Create a new project
-  2. Point it to https://github.com/Palladium-Games/Palladium-Games
+  2. Point it to https://github.com/Antarctic-GS/Antarctic-Games
   3. Create it
   4. You're ready to go! Netlify/Vercel/whatever will keep the links updated to this branch.
 
 
 ### Actual Hosting (yay)
-  1. Run ```git clone https://github.com/Palladium-Games/Palladium-Games.git```
+  1. Run ```git clone https://github.com/Antarctic-GS/Antarctic-Games.git```
   2. Configure your web server to serve the files in the Antarctic Games folder
   3. You're good to go! Remember to run ```git pull origin main``` sometimes to keep your link updated.
-
-### Backend-Served Main Site
-  1. Keep this frontend checkout beside the backend checkout, for example at `/opt/Antarctic-Games` next to `/opt/Antarctic-Backend`
-  2. Set `FRONTEND_STATIC_DIR=/opt/Antarctic-Games` in the backend env file
-  3. Put nginx in reverse-proxy mode so `/`, `/api/*`, `/wisp/`, and `/service/scramjet/...` all flow through the backend-owned origin instead of a static nginx root
-  4. Use the backend repo's checked-in cutover artifacts for the exact systemd/nginx setup
-
-## Local Game Hosting
-The frontend now commits the playable game files, SWFs, thumbnails, and a generated catalog manifest directly into this repo so a blocked `api.antarctic.games` domain does not take the whole games page down.
-The only top-level app page is `index.html`; games launch from the shell into their own tabs through `antarctic://gamelauncher?...` launch URIs.
 
 Refresh those bundled assets from a sibling backend checkout with:
 
