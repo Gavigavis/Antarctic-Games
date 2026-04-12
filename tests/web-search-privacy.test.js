@@ -80,6 +80,8 @@ function loadPrivateSearchHelpers() {
     extractFunctionSource("findPrivateSearchField"),
     extractFunctionSource("submitPrivateSearchFromFrame"),
     extractFunctionSource("syncWebTabFromUrl"),
+    extractFunctionSource("getLoadedWebPaneUrl"),
+    extractFunctionSource("shouldRevealWebPane"),
     "this.isLocalShellUrl = isLocalShellUrl;",
     "this.extractPrivateSearchDetails = extractPrivateSearchDetails;",
     "this.resolveVisibleWebUri = resolveVisibleWebUri;",
@@ -88,7 +90,9 @@ function loadPrivateSearchHelpers() {
     "this.getPublicBrowserUri = getPublicBrowserUri;",
     "this.syncBrowserUrl = syncBrowserUrl;",
     "this.submitPrivateSearchFromFrame = submitPrivateSearchFromFrame;",
-    "this.syncWebTabFromUrl = syncWebTabFromUrl;"
+    "this.syncWebTabFromUrl = syncWebTabFromUrl;",
+    "this.getLoadedWebPaneUrl = getLoadedWebPaneUrl;",
+    "this.shouldRevealWebPane = shouldRevealWebPane;"
   ].join("\n\n");
 
   vm.runInNewContext(script, context, { filename: "web-search-privacy-helpers.js" });
@@ -207,6 +211,38 @@ test("syncWebTabFromUrl ignores shell bootstrap URLs when a remote site is alrea
   assert.equal(tab.browserUri, "https://duckduckgo.com/");
   assert.equal(tab.uri, "best horror games");
   assert.equal(context.renderShellCalls, 0);
+});
+
+test("getLoadedWebPaneUrl prefers the decoded controller URL over the raw iframe src", () => {
+  const { getLoadedWebPaneUrl } = loadPrivateSearchHelpers();
+  const tab = {
+    webState: {
+      frameController: {
+        url: {
+          href: "https://example.com/docs"
+        }
+      }
+    }
+  };
+  const frame = {
+    src: "https://antarctic.games/"
+  };
+
+  assert.equal(getLoadedWebPaneUrl(tab, frame), "https://example.com/docs");
+});
+
+test("shouldRevealWebPane keeps the bootstrap shell hidden until a real page loads", () => {
+  const { shouldRevealWebPane } = loadPrivateSearchHelpers();
+  const externalTab = {
+    targetUrl: "https://duckduckgo.com/"
+  };
+  const localTab = {
+    targetUrl: "https://antarctic.games/"
+  };
+
+  assert.equal(shouldRevealWebPane(externalTab, "https://antarctic.games/?uri=best%20horror%20games"), false);
+  assert.equal(shouldRevealWebPane(externalTab, "https://example.com/docs"), true);
+  assert.equal(shouldRevealWebPane(localTab, "https://antarctic.games/"), true);
 });
 
 test("submitPrivateSearchFromFrame populates the proxied search form before submitting", () => {

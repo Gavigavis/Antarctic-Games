@@ -4653,6 +4653,33 @@
     renderShell();
   }
 
+  function getLoadedWebPaneUrl(tab, frame) {
+    try {
+      if (tab && tab.webState && tab.webState.frameController && tab.webState.frameController.url && tab.webState.frameController.url.href) {
+        return decodeScramjetUrl(tab.webState.frameController.url.href);
+      }
+    } catch (error) {
+      // Fall back to the iframe src.
+    }
+
+    try {
+      return decodeScramjetUrl(frame && frame.src);
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function shouldRevealWebPane(tab, loadedUrl) {
+    var nextUrl = cleanText(loadedUrl);
+    if (!nextUrl) {
+      return false;
+    }
+    if (!isLocalShellUrl(nextUrl)) {
+      return true;
+    }
+    return isLocalShellUrl(tab && tab.targetUrl);
+  }
+
   function navigateWebPane(tab, force) {
     if (!tab || tab.view !== "web" || !tab.webState || !tab.webState.frameController) return;
     var targetUrl = cleanText(tab.targetUrl);
@@ -4680,26 +4707,27 @@
       frame.__antarcticWebLoadBound = true;
       frame.addEventListener("load", function () {
         if (!tab.webState || !tab.webState.frameController) return;
+        var loadedUrl = getLoadedWebPaneUrl(tab, frame);
+        var revealFrame = shouldRevealWebPane(tab, loadedUrl);
         clearPendingWebSearch(tab);
-        if (tab.webState.pendingSearchQuery) {
+        if (revealFrame && tab.webState.pendingSearchQuery) {
           schedulePrivateSearchSubmission(tab, frame, 1);
         }
-        try {
-          if (tab.webState.frameController.url && tab.webState.frameController.url.href) {
-            syncWebTabFromUrl(tab, tab.webState.frameController.url.href);
-          } else {
-            syncWebTabFromUrl(tab, frame.src);
-          }
-        } catch (error) {
-          syncWebTabFromUrl(tab, frame.src);
+        if (loadedUrl) {
+          syncWebTabFromUrl(tab, loadedUrl);
         }
-        try {
-          var nextTitle = cleanText(frame.contentDocument && frame.contentDocument.title);
-          if (nextTitle) {
-            tab.title = nextTitle;
+        if (revealFrame) {
+          try {
+            var nextTitle = cleanText(frame.contentDocument && frame.contentDocument.title);
+            if (nextTitle) {
+              tab.title = nextTitle;
+            }
+          } catch (error) {
+            // Ignore proxied title access issues and keep the inferred title.
           }
-        } catch (error) {
-          // Ignore proxied title access issues and keep the inferred title.
+          renderEnabledWebPane(tab.paneEl);
+        } else {
+          renderDisabledWebPane(tab, tab.paneEl);
         }
         renderShell();
       });
@@ -4712,7 +4740,6 @@
         tab.webState.frameController = runtime.controller.createFrame(frame);
       }
 
-      renderEnabledWebPane(tab.paneEl);
       setProxyHealth(
         true,
         runtime.transportMode === "wisp"
