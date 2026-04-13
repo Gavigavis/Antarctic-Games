@@ -1,7 +1,7 @@
 window.ANTARCTIC_GAMES_CATALOG = {
   "ok": true,
   "source": "local-sync",
-  "generatedAt": "2026-04-12T14:04:54.689Z",
+  "generatedAt": "2026-04-13T20:58:00.000Z",
   "games": [
     {
       "file": "achievement-unlocked.html",
@@ -254,6 +254,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "path": "games/platformer/hollow-knight.html",
       "image": "images/game-img/hollow-knight.jpeg",
       "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fhollow-knight.html&title=Hollow%20Knight&author=Team%20Cherry"
+    },
+    {
+      "file": "jetpack-joyride.html",
+      "title": "Jetpack Joyride",
+      "author": "Halfbrick Studios",
+      "category": "Arcade",
+      "path": "games/arcade/jetpack-joyride.html",
+      "image": "images/game-img/jetpack-joyride.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Farcade%2Fjetpack-joyride.html&title=Jetpack%20Joyride&author=Halfbrick%20Studios"
     },
     {
       "file": "learn-to-fly.html",
