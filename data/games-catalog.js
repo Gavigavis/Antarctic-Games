@@ -1,7 +1,7 @@
 window.ANTARCTIC_GAMES_CATALOG = {
   "ok": true,
   "source": "local-sync",
-  "generatedAt": "2026-04-13T20:58:00.000Z",
+  "generatedAt": "2026-04-15T08:47:21.022Z",
   "games": [
     {
       "file": "achievement-unlocked.html",
@@ -263,6 +263,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "path": "games/arcade/jetpack-joyride.html",
       "image": "images/game-img/jetpack-joyride.png",
       "launchUri": "antarctic://gamelauncher?path=games%2Farcade%2Fjetpack-joyride.html&title=Jetpack%20Joyride&author=Halfbrick%20Studios"
+    },
+    {
+      "file": "kindergarten.html",
+      "title": "Kindergarten",
+      "author": "Con Man Games, SmashGames and Sean Young",
+      "category": "RPG",
+      "path": "games/rpg/kindergarten.html",
+      "image": "images/game-img/kindergarten.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Frpg%2Fkindergarten.html&title=Kindergarten&author=Con%20Man%20Games%2C%20SmashGames%20and%20Sean%20Young"
     },
     {
       "file": "learn-to-fly.html",
