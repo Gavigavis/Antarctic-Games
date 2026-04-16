@@ -1,7 +1,7 @@
 window.ANTARCTIC_GAMES_CATALOG = {
   "ok": true,
   "source": "local-sync",
-  "generatedAt": "2026-04-15T08:47:21.022Z",
+  "generatedAt": "2026-04-16T13:00:00.000Z",
   "games": [
     {
       "file": "achievement-unlocked.html",
@@ -245,6 +245,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "path": "games/platformer/geodash-lite.html",
       "image": "images/game-img/geometry-dash.png",
       "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fgeodash-lite.html&title=Geometry%20Dash%20Lite&author=RobTop%20Games"
+    },
+    {
+      "file": "gladihoppers.html",
+      "title": "Gladihoppers",
+      "author": "Dreamon Studios",
+      "category": "Action",
+      "path": "games/action/gladihoppers.html",
+      "image": "images/game-img/gladihoppers.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Faction%2Fgladihoppers.html&title=Gladihoppers&author=Dreamon%20Studios"
     },
     {
       "file": "hollow-knight.html",
