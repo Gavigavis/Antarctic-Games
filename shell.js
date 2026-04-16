@@ -15,8 +15,8 @@
   var LOCAL_APP_ASSET_VERSION = "2026-03-22-asset-1";
   var PROXY_RUNTIME_ASSET_VERSION = "2026-03-23-proxy-5";
   var PROXY_DISABLED_MESSAGE = "Web browsing could not start right now.";
-  var PROXY_IDLE_MESSAGE = "Web browsing will connect when you open a page.";
-  var PROXY_BOOT_MESSAGE = "Connecting the web browsing runtime...";
+  var PROXY_IDLE_MESSAGE = "Antarctic will connect the ready fallback proxy when you open a page.";
+  var PROXY_BOOT_MESSAGE = "Connecting the ready fallback proxy...";
   var PROXY_WISP_PROBE_TIMEOUT_MS = 900;
   var SHELL_SCALE_MIN = 0.78;
   var PRIVATE_SEARCH_AUTOFILL_RETRY_MS = 180;
@@ -1165,8 +1165,16 @@
   }
 
   function updateAddressBarHistoryButtons() {
+    var active = getActiveTab();
+    var hasChatBack = Boolean(
+      active &&
+      isChatViewName(active.view) &&
+      active.chatState &&
+      Number(active.chatState.wizardStep || 2) > 2 &&
+      cleanText(active.chatState.activeThreadId)
+    );
     if (elements.addressUndoButton) {
-      elements.addressUndoButton.disabled = addressBarHistoryState.past.length === 0;
+      elements.addressUndoButton.disabled = !hasChatBack && addressBarHistoryState.past.length === 0;
     }
     if (elements.addressRedoButton) {
       elements.addressRedoButton.disabled = addressBarHistoryState.future.length === 0;
@@ -1467,28 +1475,15 @@
     for (var d = 0; d < dots.length; d += 1) {
       dots[d].classList.toggle("is-active", d === next - 1);
     }
-    var backBtn = pane.querySelector("[data-chat-wizard-back]");
     var nextBtn = pane.querySelector("[data-chat-wizard-next]");
-    if (backBtn) backBtn.hidden = next <= 2;
     if (nextBtn) nextBtn.hidden = true;
+    updateAddressBarHistoryButtons();
   }
 
   function wireChatWizard(tab, pane) {
     if (!pane || pane.dataset.chatWizardBound === "true") return;
     pane.dataset.chatWizardBound = "true";
-    var backBtn = pane.querySelector("[data-chat-wizard-back]");
     var nextBtn = pane.querySelector("[data-chat-wizard-next]");
-    if (backBtn) {
-      backBtn.addEventListener("click", function () {
-        var current = (tab.chatState && tab.chatState.wizardStep) || 2;
-        if (current === 3) {
-          tab.chatState.activeThreadId = "";
-          setChatWizardStep(tab, pane, 2);
-        } else {
-          setChatWizardStep(tab, pane, current - 1);
-        }
-      });
-    }
     if (nextBtn) {
       nextBtn.addEventListener("click", function () {
         var current = (tab.chatState && tab.chatState.wizardStep) || 2;
@@ -1927,11 +1922,18 @@
     var primaryCommunityRoute = getPrimaryCommunityRoute(bootstrap);
     summaryEl.innerHTML =
       '<div class="account-summary__hero">' +
-        '<div class="account-summary__identity">' +
-          '<span class="account-summary__eyebrow">Signed in</span>' +
-          '<strong>@' + escapeHtml(session.user.username) + "</strong>" +
-          '<span>Joined ' + escapeHtml(formatTimestamp(session.user.createdAt)) + "</span>" +
-          '<span>' + escapeHtml(String(stats.threadCount || 0)) + " conversations synced in this browser.</span>" +
+        '<div class="account-summary__content">' +
+          '<div class="account-summary__identity">' +
+            '<span class="account-summary__eyebrow">Signed in</span>' +
+            '<strong>@' + escapeHtml(session.user.username) + "</strong>" +
+            '<span>Joined ' + escapeHtml(formatTimestamp(session.user.createdAt)) + "</span>" +
+            '<span>' + escapeHtml(String(stats.threadCount || 0)) + " conversations synced in this browser.</span>" +
+          "</div>" +
+          '<div class="account-summary__badges">' +
+            '<span class="account-summary__badge">' + escapeHtml(String(stats.threadCount || 0)) + ' chats</span>' +
+            '<span class="account-summary__badge">' + escapeHtml(String(stats.roomCount || 0)) + ' rooms</span>' +
+            '<span class="account-summary__badge">' + escapeHtml(String(stats.saveCount || 0)) + ' saves</span>' +
+          "</div>" +
         "</div>" +
         '<div class="account-summary__actions">' +
           '<button type="button" class="toolbar-button toolbar-button--accent" data-account-route="' + escapeHtml(primaryCommunityRoute) + '">Open community</button>' +
@@ -3026,6 +3028,24 @@
     return pane;
   }
 
+  function navigateToolbarBack(active) {
+    if (
+      active &&
+      isChatViewName(active.view) &&
+      active.chatState &&
+      Number(active.chatState.wizardStep || 2) > 2 &&
+      cleanText(active.chatState.activeThreadId)
+    ) {
+      active.chatState.activeThreadId = "";
+      if (active.paneEl) {
+        setChatWizardStep(active, active.paneEl, 2);
+        syncChatPane(active.paneEl, active, "Back to chats.");
+      }
+      return true;
+    }
+    return false;
+  }
+
   function setGameCloudStatus(pane, message) {
     if (!pane) return;
     var statusEl = pane.querySelector('[data-role="game-cloud-status"]');
@@ -3174,23 +3194,27 @@
       '<div class="shell-pane__frame-wrap">' +
         '<iframe class="shell-pane__frame" referrerpolicy="no-referrer" allow="clipboard-read; clipboard-write; fullscreen" sandbox="allow-downloads allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>' +
         '<div class="empty-state empty-state--stacked shell-pane__web-status" data-role="web-status" hidden>' +
-          "<strong>Web browsing is unavailable right now.</strong>" +
+          '<strong data-role="web-status-title">Preparing the fallback web proxy.</strong>' +
           '<span data-role="web-disabled-copy"></span>' +
         "</div>" +
       "</div>";
-    renderDisabledWebPane(tab, pane);
+    renderDisabledWebPane(tab, pane, PROXY_IDLE_MESSAGE, "Preparing the fallback web proxy.");
     return pane;
   }
 
-  function renderDisabledWebPane(tab, pane, message) {
+  function renderDisabledWebPane(tab, pane, message, title) {
     var copyEl = pane && pane.querySelector('[data-role="web-disabled-copy"]');
     var statusEl = pane && pane.querySelector('[data-role="web-status"]');
+    var titleEl = pane && pane.querySelector('[data-role="web-status-title"]');
     var frame = pane && pane.querySelector("iframe.shell-pane__frame");
     if (statusEl) {
       statusEl.hidden = false;
     }
     if (frame) {
       frame.hidden = true;
+    }
+    if (titleEl) {
+      titleEl.textContent = cleanText(title) || (cleanText(message) ? "Web browsing is unavailable right now." : "Preparing the fallback web proxy.");
     }
     if (!copyEl) return;
     var targetUrl = cleanText(tab && tab.targetUrl);
@@ -4718,7 +4742,7 @@
     var frame = tab.paneEl.querySelector("iframe.shell-pane__frame");
     if (!frame) return;
 
-    renderDisabledWebPane(tab, tab.paneEl, PROXY_BOOT_MESSAGE);
+    renderDisabledWebPane(tab, tab.paneEl, PROXY_BOOT_MESSAGE, "Preparing the fallback web proxy.");
     setProxyHealth(false, PROXY_BOOT_MESSAGE, "Starting");
 
     if (!frame.__antarcticWebLoadBound) {
@@ -4745,7 +4769,7 @@
           }
           renderEnabledWebPane(tab.paneEl);
         } else {
-          renderDisabledWebPane(tab, tab.paneEl);
+          renderDisabledWebPane(tab, tab.paneEl, PROXY_IDLE_MESSAGE, "Preparing the fallback web proxy.");
         }
         renderShell();
       });
@@ -5702,6 +5726,9 @@
 
     if (elements.addressUndoButton) {
       elements.addressUndoButton.addEventListener("click", function () {
+        if (navigateToolbarBack(getActiveTab())) {
+          return;
+        }
         addressBarUndo();
       });
     }

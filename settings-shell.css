@@ -709,8 +709,8 @@
 
 .pane-wizard__step-body--room .chat-room {
   flex: 1;
-  min-height: min(30rem, 58dvh);
-  max-height: min(62rem, calc(100dvh - 9.5rem));
+  min-height: min(34rem, 64dvh);
+  max-height: min(68rem, calc(100dvh - 7.4rem));
 }
 
 .pane-wizard__eyebrow {
@@ -810,11 +810,11 @@
 }
 
 .account-summary__hero {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.05rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(13.5rem, 18rem);
+  align-items: stretch;
+  gap: 1rem 1.1rem;
+  padding: 1.1rem 1.15rem;
   border-radius: 1.15rem;
   background:
     linear-gradient(135deg, rgba(45, 125, 255, 0.15), rgba(17, 26, 38, 0.58)),
@@ -823,6 +823,12 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 20px 40px rgba(5, 11, 18, 0.2);
+}
+
+.account-summary__content {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
 }
 
 .account-summary__identity {
@@ -850,11 +856,40 @@
   font-size: 0.88rem;
 }
 
-.account-summary__actions {
+.account-summary__badges {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.account-summary__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(8, 17, 28, 0.42);
+  border: 1px solid rgba(88, 160, 255, 0.2);
+  color: rgba(226, 236, 252, 0.88);
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.account-summary__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
   gap: 0.65rem;
+}
+
+.account-summary__actions .toolbar-button {
+  width: 100%;
+  justify-content: center;
+}
+
+.account-summary__actions .toolbar-button--accent {
+  grid-column: 1 / -1;
 }
 
 .account-metrics {
@@ -885,9 +920,14 @@
 }
 
 .account-quick-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   gap: 0.65rem;
+}
+
+.account-quick-actions .toolbar-button {
+  width: 100%;
+  justify-content: center;
 }
 
 .account-save-card {
@@ -2004,14 +2044,17 @@
     width: min(100%, 92%);
   }
 
-  .account-summary__hero,
+  .account-summary__hero {
+    grid-template-columns: 1fr;
+  }
+
   .chat-session-card {
     flex-direction: column;
     align-items: flex-start;
   }
 
   .account-summary__actions {
-    justify-content: flex-start;
+    grid-template-columns: 1fr;
   }
 
   .shell-pane--gamelauncher {

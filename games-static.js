@@ -191,18 +191,37 @@
     });
   }
 
-  function pickFeaturedGame(games) {
+  function buildFeaturedGamePool(games) {
     if (!Array.isArray(games) || !games.length) {
+      return [];
+    }
+
+    var withArtwork = games.filter(function (game) {
+      return Boolean(sanitizeText(game && game.image));
+    });
+
+    return sortCatalogGames(withArtwork.length ? withArtwork : games);
+  }
+
+  function resolveFeaturedRotationIndex(size, rawDate) {
+    if (!size) return 0;
+
+    var today = rawDate instanceof Date ? new Date(rawDate.getTime()) : rawDate ? new Date(rawDate) : new Date();
+    if (Number.isNaN(today.getTime())) {
+      today = new Date(0);
+    }
+
+    var dayNumber = Math.floor(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()) / 86400000);
+    return Math.abs(dayNumber) % size;
+  }
+
+  function pickFeaturedGame(games, rawDate) {
+    var pool = buildFeaturedGamePool(games);
+    if (!pool.length) {
       return null;
     }
 
-    for (var index = 0; index < games.length; index += 1) {
-      if (sanitizeText(games[index] && games[index].image)) {
-        return games[index];
-      }
-    }
-
-    return games[0];
+    return pool[resolveFeaturedRotationIndex(pool.length, rawDate)];
   }
 
   function readEmbeddedCatalog() {
