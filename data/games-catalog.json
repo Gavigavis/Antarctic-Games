@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "local-sync",
-  "generatedAt": "2026-04-16T13:00:00.000Z",
+  "generatedAt": "2026-04-17T20:23:09.000Z",
   "games": [
     {
       "file": "achievement-unlocked.html",
@@ -263,6 +263,15 @@
       "path": "games/platformer/hollow-knight.html",
       "image": "images/game-img/hollow-knight.jpeg",
       "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fhollow-knight.html&title=Hollow%20Knight&author=Team%20Cherry"
+    },
+    {
+      "file": "ice-dodo.html",
+      "title": "Ice Dodo",
+      "author": "Onionfist Studio",
+      "category": "Platformer",
+      "path": "games/platformer/ice-dodo.html",
+      "image": "images/game-img/ice-dodo.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fice-dodo.html&title=Ice%20Dodo&author=Onionfist%20Studio"
     },
     {
       "file": "jetpack-joyride.html",
