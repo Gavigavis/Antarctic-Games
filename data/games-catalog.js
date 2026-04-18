@@ -1,7 +1,7 @@
 window.ANTARCTIC_GAMES_CATALOG = {
   "ok": true,
   "source": "local-sync",
-  "generatedAt": "2026-04-17T20:23:09.000Z",
+  "generatedAt": "2026-04-18T17:39:00.000Z",
   "games": [
     {
       "file": "achievement-unlocked.html",
@@ -146,6 +146,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "path": "games/escape-road/escape-road.html",
       "image": "images/game-img/escape-road.png",
       "launchUri": "antarctic://gamelauncher?path=games%2Fescape-road%2Fescape-road.html&title=Escape%20Road&author=AZgames"
+    },
+    {
+      "file": "ovo-2.html",
+      "title": "OvO 2",
+      "author": "Dedra Games",
+      "category": "Platformer",
+      "path": "games/platformer/ovo-2.html",
+      "image": "images/game-img/ovo-2.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fovo-2.html&title=OvO%202&author=Dedra%20Games"
     },
     {
       "file": "fnaw.html",
