@@ -407,6 +407,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "path": "games/swf/the-impossible-quiz.html",
       "image": "images/game-img/the-impossible-quiz.png",
       "launchUri": "antarctic://gamelauncher?path=games%2Fswf%2Fthe-impossible-quiz.html&title=The%20Impossible%20Quiz&author=Splapp-me-do"
+    },
+    {
+      "file": "ultrakill.html",
+      "title": "ULTRAKILL",
+      "author": "New Blood Interactive, Cake Logic",
+      "category": "Action",
+      "path": "games/action/ultrakill.html",
+      "image": "images/game-img/ultrakill.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Faction%2Fultrakill.html&title=ULTRAKILL&author=New%20Blood%20Interactive%2C%20Cake%20Logic"
     }
   ]
 };
