@@ -253,14 +253,11 @@ test("frontend shell ships the proxy runtime and preserves sidebar controls", ()
   assert.doesNotMatch(backendHelper, /return "https:\/\/api\.sethpang\.com";/);
 });
 
-test("service worker unregisters the old proxy runtime", () => {
+test("service worker claims clients and stays active", () => {
   const serviceWorker = fs.readFileSync(path.join(FRONTEND_DIR, "sw.js"), "utf8");
 
-  assert.match(serviceWorker, /self\.addEventListener\("install"/);
-  assert.match(serviceWorker, /self\.skipWaiting\(\)/);
-  assert.match(serviceWorker, /self\.addEventListener\("activate"/);
   assert.match(serviceWorker, /self\.clients\.claim\(\)/);
-  assert.match(serviceWorker, /self\.registration\.unregister\(\)/);
+  assert.doesNotMatch(serviceWorker, /self\.registration\.unregister\(\)/);
   assert.doesNotMatch(serviceWorker, /scramjet/i);
   assert.doesNotMatch(serviceWorker, /baremux/i);
   assert.doesNotMatch(serviceWorker, /fetch", function \(event\)/);

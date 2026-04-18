@@ -6,7 +6,6 @@ self.addEventListener("activate", function (event) {
   event.waitUntil(
     (async function () {
       await self.clients.claim();
-      await self.registration.unregister();
     })()
   );
 });
