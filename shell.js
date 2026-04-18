@@ -5032,13 +5032,18 @@
     var lines = source.split("\n");
     var html = [];
     var listOpen = false;
+    var listType = "";
     var codeOpen = false;
     var codeLines = [];
+    var blockquoteOpen = false;
+    var blockquoteLines = [];
+    var hrCount = 0;
 
     function closeList() {
       if (listOpen) {
-        html.push("</ul>");
+        html.push("</" + listType + ">");
         listOpen = false;
+        listType = "";
       }
     }
 
@@ -5050,12 +5055,28 @@
       }
     }
 
+    function closeBlockquote() {
+      if (blockquoteOpen) {
+        var inner = blockquoteLines.map(function (l) {
+          return inlineMarkdown(l.trim().replace(/^>\s?/, ""));
+        }).join(" ");
+        html.push("<blockquote>" + inner + "</blockquote>");
+        blockquoteOpen = false;
+        blockquoteLines = [];
+      }
+    }
+
+    function checkHr(trimmed) {
+      return /^[-*_]{3,}\s*$/.test(trimmed);
+    }
+
     for (var index = 0; index < lines.length; index += 1) {
       var line = lines[index];
       var trimmed = line.trim();
 
       if (/^```/.test(trimmed)) {
         closeList();
+        closeBlockquote();
         if (codeOpen) {
           closeCode();
         } else {
@@ -5071,24 +5092,92 @@
 
       if (!trimmed) {
         closeList();
+        closeBlockquote();
+        if (hrCount > 0) {
+          html.push("<hr>");
+          hrCount = 0;
+        }
+        continue;
+      }
+
+      if (checkHr(trimmed)) {
+        hrCount++;
+        if (hrCount >= 1 && index === lines.length - 1) {
+          closeList();
+          closeBlockquote();
+          html.push("<hr>");
+          hrCount = 0;
+        }
+        continue;
+      }
+
+      if (hrCount > 0) {
+        closeList();
+        closeBlockquote();
+        html.push("<hr>");
+        hrCount = 0;
+      }
+
+      var headingMatch = trimmed.match(/^(#{1,6})\s+(.+)/);
+      if (headingMatch) {
+        closeList();
+        closeBlockquote();
+        var level = headingMatch[1].length;
+        html.push("<h" + level + ">" + inlineMarkdown(escapeHtml(headingMatch[2])) + "</h" + level + ">");
+        continue;
+      }
+
+      if (/^>\s?/.test(trimmed)) {
+        closeList();
+        if (!blockquoteOpen) {
+          blockquoteOpen = true;
+          blockquoteLines = [];
+        }
+        blockquoteLines.push(trimmed.replace(/^>\s?/, ""));
+        continue;
+      }
+
+      if (blockquoteOpen) {
+        closeBlockquote();
+      }
+
+      var orderedMatch = trimmed.match(/^(\d+)\.\s+(.+)/);
+      if (orderedMatch) {
+        if (listOpen && listType !== "ol") {
+          closeList();
+        }
+        if (!listOpen) {
+          html.push("<ol>");
+          listOpen = true;
+          listType = "ol";
+        }
+        html.push("<li>" + inlineMarkdown(escapeHtml(orderedMatch[2])) + "</li>");
         continue;
       }
 
       if (/^[-*]\s+/.test(trimmed)) {
+        if (listOpen && listType !== "ul") {
+          closeList();
+        }
         if (!listOpen) {
           html.push("<ul>");
           listOpen = true;
+          listType = "ul";
         }
-        html.push("<li>" + inlineMarkdown(trimmed.replace(/^[-*]\s+/, "")) + "</li>");
+        html.push("<li>" + inlineMarkdown(escapeHtml(trimmed.replace(/^[-*]\s+/, ""))) + "</li>");
         continue;
       }
 
       closeList();
-      html.push("<p>" + inlineMarkdown(trimmed) + "</p>");
+      html.push("<p>" + inlineMarkdown(escapeHtml(trimmed)) + "</p>");
     }
 
     closeCode();
     closeList();
+    closeBlockquote();
+    if (hrCount > 0) {
+      html.push("<hr>");
+    }
     return html.join("");
   }
 
