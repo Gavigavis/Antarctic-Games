@@ -139,6 +139,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "launchUri": "antarctic://gamelauncher?path=games%2Fplatformer%2Fcrossy-road.html&title=Crossy%20Road&author=Hipster%20Whale"
     },
     {
+      "file": "crazy-cattle-3d.html",
+      "title": "Crazy Cattle 3D",
+      "author": "4nn4t4t",
+      "category": "Simulation",
+      "path": "games/others/crazy-cattle-3d.html",
+      "image": "images/game-img/crazy-cattle-3d.png",
+      "launchUri": "antarctic://gamelauncher?path=games%2Fothers%2Fcrazy-cattle-3d.html&title=Crazy%20Cattle%203D&author=4nn4t4t"
+    },
+    {
       "file": "eaglercraft-1.12.2.html",
       "title": "Eaglercraft 1.12.2",
       "author": "lax1dude + PeytonPlayz585",
