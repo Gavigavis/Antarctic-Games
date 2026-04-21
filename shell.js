@@ -2930,7 +2930,7 @@
 
   function createGameLauncherPane(tab) {
     var pane = document.createElement("section");
-    pane.className = "shell-pane shell-pane--internal shell-pane--gamelauncher";
+    pane.className = "shell-pane shell-pane--gamelauncher";
     pane.addEventListener("click", handlePaneAction);
 
     var title = cleanText(tab.title) || "Game Launcher";
@@ -2942,27 +2942,27 @@
 
     var barHintHtml =
       !gamePath && !author
-        ? '<span class="game-launcher__bar-hint"><span class="game-launcher__bar-sep" aria-hidden="true"> -- </span>Pick a game from the library.</span>'
+        ? '<span class="game-launcher__panel-hint">Pick a game from the library.</span>'
         : "";
 
     pane.innerHTML =
       '<div class="game-launcher">' +
-        '<div class="game-launcher__stage">' +
-          '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
-          '<div class="game-launcher__bar">' +
-            '<div class="game-launcher__bar-start">' +
-              '<span class="game-launcher__bar-title">' +
+        '<div class="game-launcher__panel" data-role="game-panel">' +
+          '<div class="game-launcher__panel-handle" data-role="game-panel-handle"></div>' +
+          '<div class="game-launcher__panel-content">' +
+            '<div class="game-launcher__panel-info">' +
+              '<span class="game-launcher__panel-title">' +
                 escapeHtml(title) +
                 "</span>" +
                 (author
-                  ? '<span class="game-launcher__bar-sep" aria-hidden="true">\u00A0--\u00A0</span>' +
-                    '<span class="game-launcher__bar-author">' +
+                  ? '<span class="game-launcher__panel-sep" aria-hidden="true">\u00A0--\u00A0</span>' +
+                    '<span class="game-launcher__panel-author">' +
                     escapeHtml(author) +
                     "</span>"
                   : "") +
               barHintHtml +
             "</div>" +
-            '<div class="game-launcher__bar-end">' +
+            '<div class="game-launcher__panel-actions">' +
               '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
               '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
               "Load cloud" +
@@ -2985,6 +2985,7 @@
             "</div>" +
           "</div>" +
         "</div>" +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
       "</div>";
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
@@ -3024,6 +3025,130 @@
         loadGameCloudState(tab, pane);
       }
     });
+
+   var panel = pane.querySelector('[data-role="game-panel"]');
+    var panelHandle = pane.querySelector('[data-role="game-panel-handle"]');
+    var panelOpen = false;
+
+    function setPanelVisible(visible) {
+      panelOpen = visible;
+      panel.setAttribute("data-visible", visible ? "true" : "false");
+    }
+
+    function togglePanel() {
+      setPanelVisible(!panelOpen);
+    }
+
+    if (panelHandle) {
+      panelHandle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        togglePanel();
+      });
+    }
+
+    if (panel) {
+      panel.addEventListener("click", function (e) {
+        if (e.target === panel || e.target.closest(".game-launcher__panel-content") === null && e.target.closest(".game-launcher__panel-handle") === null) {
+          if (panelOpen) {
+            setPanelVisible(false);
+          }
+        }
+      });
+    }
+
+    var panelStartY = 0;
+    var panelDragging = false;
+
+    function startPanelDrag(clientY) {
+      panelStartY = clientY;
+      panelDragging = false;
+    }
+
+    function movePanelDrag(clientY) {
+      var deltaY = clientY - panelStartY;
+
+      if (!panelDragging && Math.abs(deltaY) > 8) {
+        panelDragging = true;
+      }
+
+      if (!panelDragging) return false;
+
+      if (deltaY > 0 && !panelOpen) {
+        var progress = Math.min(deltaY / 120, 1);
+        panel.setAttribute("data-visible", "partial");
+        panel.style.transform = "translateY(" + (-100 + progress * 100) + "%)";
+        return true;
+      } else if (deltaY < 0 && panelOpen) {
+        var progress2 = Math.min(Math.abs(deltaY) / 120, 1);
+        if (panel.getAttribute("data-visible") !== "partial") {
+          panel.style.transform = "translateY(" + (-100 + progress2 * 100) + "%)";
+        }
+        return true;
+      }
+      return false;
+    }
+
+    function endPanelDrag(deltaY) {
+      panelDragging = false;
+
+      if (deltaY > 60 && !panelOpen) {
+        setPanelVisible(true);
+      } else if (deltaY < -60 && panelOpen) {
+        setPanelVisible(false);
+      }
+
+      panel.style.transform = "";
+      if (panel.getAttribute("data-visible") === "partial") {
+        panel.setAttribute("data-visible", panelOpen ? "true" : "false");
+      }
+    }
+
+    if (viewport && panel) {
+      viewport.addEventListener("touchstart", function (e) {
+        if (e.target.closest(".game-launcher__panel")) return;
+        startPanelDrag(e.touches[0].clientY);
+      }, { passive: true });
+
+      viewport.addEventListener("touchmove", function (e) {
+        if (e.target.closest(".game-launcher__panel")) return;
+        if (movePanelDrag(e.touches[0].clientY)) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      viewport.addEventListener("touchend", function (e) {
+        if (!panelDragging) return;
+        var deltaY = e.changedTouches[0].clientY - panelStartY;
+        endPanelDrag(deltaY);
+      });
+
+      viewport.addEventListener("mousedown", function (e) {
+        if (e.target.closest(".game-launcher__panel")) return;
+        if (e.button !== 0) return;
+        startPanelDrag(e.clientY);
+      });
+
+      viewport.addEventListener("mousemove", function (e) {
+        if (!panelDragging && !viewport._panelMouseDown) return;
+        if (!panelDragging) {
+          viewport._panelMouseDown = true;
+          if (movePanelDrag(e.clientY)) {
+            e.preventDefault();
+          }
+        } else if (movePanelDrag(e.clientY)) {
+          e.preventDefault();
+        }
+      });
+
+      viewport.addEventListener("mouseup", function (e) {
+        if (!panelDragging && !viewport._panelMouseDown) return;
+        viewport._panelMouseDown = false;
+        if (panelDragging || Math.abs(e.clientY - panelStartY) > 8) {
+          var deltaY = e.clientY - panelStartY;
+          endPanelDrag(deltaY);
+        }
+      });
+    }
 
     return pane;
   }
