@@ -2945,9 +2945,57 @@
         ? '<span class="game-launcher__panel-hint">Pick a game from the library.</span>'
         : "";
 
-    pane.innerHTML =
+   pane.innerHTML =
       '<div class="game-launcher">' +
-        '<div class="game-launcher__panel" data-role="game-panel">' +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
+          '<div class="game-launcher__panel" data-role="game-panel">' +
+            '<div class="game-launcher__panel-handle" data-role="game-panel-handle"></div>' +
+            '<div class="game-launcher__panel-content">' +
+              '<div class="game-launcher__panel-info">' +
+                '<span class="game-launcher__panel-title">' +
+                  escapeHtml(title) +
+                  "</span>" +
+                  (author
+                    ? '<span class="game-launcher__panel-sep" aria-hidden="true">\u00A0--\u00A0</span>' +
+                      '<span class="game-launcher__panel-author">' +
+                      escapeHtml(author) +
+                      "</span>"
+                    : "") +
+                barHintHtml +
+              "</div>" +
+              '<div class="game-launcher__panel-actions">' +
+                '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
+                '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
+                "Load cloud" +
+                "</button>" +
+                '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
+                "Save cloud" +
+                "</button>" +
+                '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
+                "Back to games" +
+                "</button>" +
+                '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
+                ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
+                fullscreenDisabled +
+                ">" +
+                '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
+                "</svg>" +
+                "<span>Fullscreen</span>" +
+                "</button>" +
+              "</div>" +
+            "</div>" +
+          "</div>" +
+          '<div class="game-launcher__touch-layer" data-role="game-touch-layer"></div>' +
+        "</div>" +
+      "</div>";
+
+    var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
+    if (!viewport) return pane;
+
+    if (!gamePath) {
+      viewport.innerHTML =
+        '<div class="game-launcher__panel" data-role="game-panel" hidden>' +
           '<div class="game-launcher__panel-handle" data-role="game-panel-handle"></div>' +
           '<div class="game-launcher__panel-content">' +
             '<div class="game-launcher__panel-info">' +
@@ -2960,39 +3008,32 @@
                     escapeHtml(author) +
                     "</span>"
                   : "") +
-              barHintHtml +
-            "</div>" +
-            '<div class="game-launcher__panel-actions">' +
-              '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
-              '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
-              "Load cloud" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
-              "Save cloud" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
-              "Back to games" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
-              ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
-              fullscreenDisabled +
-              ">" +
-              '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-              '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
-              "</svg>" +
-              "<span>Fullscreen</span>" +
-              "</button>" +
+                barHintHtml +
+              "</div>" +
+              '<div class="game-launcher__panel-actions">' +
+                '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
+                '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
+                "Load cloud" +
+                "</button>" +
+                '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
+                "Save cloud" +
+                "</button>" +
+                '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
+                "Back to games" +
+                "</button>" +
+                '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
+                ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
+                fullscreenDisabled +
+                ">" +
+                '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
+                "</svg>" +
+                "<span>Fullscreen</span>" +
+                "</button>" +
+              "</div>" +
             "</div>" +
           "</div>" +
-        "</div>" +
-        '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
-      "</div>";
-
-    var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
-    if (!viewport) return pane;
-
-    if (!gamePath) {
-      viewport.innerHTML =
+        '</div>' +
         '<div class="empty-state empty-state--launcher">' +
           "<strong>No game selected yet.</strong>" +
           "<span>Open a title from the game library to launch it here.</span>" +
@@ -3008,31 +3049,20 @@
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
 
-    pane.addEventListener("click", function (event) {
-      var target = event.target;
-      if (!target || typeof target.closest !== "function") return;
-
-      var saveButton = target.closest("[data-game-save]");
-      if (saveButton) {
-        event.preventDefault();
-        saveGameCloudState(tab, pane);
-        return;
-      }
-
-      var loadButton = target.closest("[data-game-load]");
-      if (loadButton) {
-        event.preventDefault();
-        loadGameCloudState(tab, pane);
-      }
-    });
-
-   var panel = pane.querySelector('[data-role="game-panel"]');
-    var panelHandle = pane.querySelector('[data-role="game-panel-handle"]');
+    var panel = viewport.querySelector('[data-role="game-panel"]');
+    var panelHandle = viewport.querySelector('[data-role="game-panel-handle"]');
+    var touchLayer = viewport.querySelector('[data-role="game-touch-layer"]');
     var panelOpen = false;
+    var dragStartY = 0;
+    var dragActive = false;
+    var dragDelta = 0;
 
     function setPanelVisible(visible) {
       panelOpen = visible;
       panel.setAttribute("data-visible", visible ? "true" : "false");
+      if (touchLayer) {
+        touchLayer.style.pointerEvents = visible ? "none" : "all";
+      }
     }
 
     function togglePanel() {
@@ -3046,108 +3076,84 @@
       });
     }
 
-    if (panel) {
-      panel.addEventListener("click", function (e) {
-        if (e.target === panel || e.target.closest(".game-launcher__panel-content") === null && e.target.closest(".game-launcher__panel-handle") === null) {
-          if (panelOpen) {
-            setPanelVisible(false);
-          }
-        }
+    function handleOverlayClick(e) {
+      if (panelOpen) return;
+      if (e.target.closest(".game-launcher__panel")) return;
+      if (e.target.closest(".game-launcher__panel-handle")) return;
+
+      var rect = frame.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+
+      var mouseEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        clientX: x,
+        clientY: y
       });
+      frame.dispatchEvent(mouseEvent);
     }
 
-    var panelStartY = 0;
-    var panelDragging = false;
-
-    function startPanelDrag(clientY) {
-      panelStartY = clientY;
-      panelDragging = false;
+    function handleOverlayTouchStart(e) {
+      if (panelOpen) return;
+      if (e.target.closest(".game-launcher__panel")) return;
+      dragStartY = e.touches[0].clientY;
+      dragActive = false;
+      dragDelta = 0;
     }
 
-    function movePanelDrag(clientY) {
-      var deltaY = clientY - panelStartY;
+    function handleOverlayTouchMove(e) {
+      if (panelOpen) return;
+      if (e.target.closest(".game-launcher__panel")) return;
+      var touchY = e.touches[0].clientY;
+      dragDelta = touchY - dragStartY;
 
-      if (!panelDragging && Math.abs(deltaY) > 8) {
-        panelDragging = true;
+      if (!dragActive && Math.abs(dragDelta) > 8) {
+        dragActive = true;
       }
 
-      if (!panelDragging) return false;
+      if (!dragActive) return;
 
-      if (deltaY > 0 && !panelOpen) {
-        var progress = Math.min(deltaY / 120, 1);
-        panel.setAttribute("data-visible", "partial");
+      if (dragDelta > 0 && !panelOpen) {
+        var progress = Math.min(dragDelta / 120, 1);
         panel.style.transform = "translateY(" + (-100 + progress * 100) + "%)";
-        return true;
-      } else if (deltaY < 0 && panelOpen) {
-        var progress2 = Math.min(Math.abs(deltaY) / 120, 1);
-        if (panel.getAttribute("data-visible") !== "partial") {
-          panel.style.transform = "translateY(" + (-100 + progress2 * 100) + "%)";
-        }
-        return true;
+      } else if (dragDelta < 0 && panelOpen) {
+        var progress2 = Math.min(Math.abs(dragDelta) / 120, 1);
+        panel.style.transform = "translateY(" + (-100 + progress2 * 100) + "%)";
       }
-      return false;
+
+      e.preventDefault();
     }
 
-    function endPanelDrag(deltaY) {
-      panelDragging = false;
+    function handleOverlayTouchEnd() {
+      if (panelOpen) return;
+      if (!dragActive) return;
 
-      if (deltaY > 60 && !panelOpen) {
+      if (dragDelta > 60 && !panelOpen) {
         setPanelVisible(true);
-      } else if (deltaY < -60 && panelOpen) {
+      } else if (dragDelta < -60 && panelOpen) {
         setPanelVisible(false);
+      } else {
+        if (panelOpen) {
+          panel.style.transform = "translateY(0)";
+        } else {
+          panel.style.transform = "";
+        }
       }
 
-      panel.style.transform = "";
-      if (panel.getAttribute("data-visible") === "partial") {
-        panel.setAttribute("data-visible", panelOpen ? "true" : "false");
-      }
+      dragActive = false;
+      dragDelta = 0;
     }
 
-    if (viewport && panel) {
-      viewport.addEventListener("touchstart", function (e) {
-        if (e.target.closest(".game-launcher__panel")) return;
-        startPanelDrag(e.touches[0].clientY);
-      }, { passive: true });
+    if (touchLayer) {
+      touchLayer.addEventListener("click", handleOverlayClick);
+      touchLayer.addEventListener("touchstart", handleOverlayTouchStart, { passive: true });
+      touchLayer.addEventListener("touchmove", handleOverlayTouchMove, { passive: false });
+      touchLayer.addEventListener("touchend", handleOverlayTouchEnd);
+    }
 
-      viewport.addEventListener("touchmove", function (e) {
-        if (e.target.closest(".game-launcher__panel")) return;
-        if (movePanelDrag(e.touches[0].clientY)) {
-          e.preventDefault();
-        }
-      }, { passive: false });
-
-      viewport.addEventListener("touchend", function (e) {
-        if (!panelDragging) return;
-        var deltaY = e.changedTouches[0].clientY - panelStartY;
-        endPanelDrag(deltaY);
-      });
-
-      viewport.addEventListener("mousedown", function (e) {
-        if (e.target.closest(".game-launcher__panel")) return;
-        if (e.button !== 0) return;
-        startPanelDrag(e.clientY);
-      });
-
-      viewport.addEventListener("mousemove", function (e) {
-        if (!panelDragging && !viewport._panelMouseDown) return;
-        if (!panelDragging) {
-          viewport._panelMouseDown = true;
-          if (movePanelDrag(e.clientY)) {
-            e.preventDefault();
-          }
-        } else if (movePanelDrag(e.clientY)) {
-          e.preventDefault();
-        }
-      });
-
-      viewport.addEventListener("mouseup", function (e) {
-        if (!panelDragging && !viewport._panelMouseDown) return;
-        viewport._panelMouseDown = false;
-        if (panelDragging || Math.abs(e.clientY - panelStartY) > 8) {
-          var deltaY = e.clientY - panelStartY;
-          endPanelDrag(deltaY);
-        }
-      });
+    if (panel && !gamePath) {
+      panel.setAttribute("hidden", "");
     }
 
     return pane;
