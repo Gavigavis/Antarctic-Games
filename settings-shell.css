@@ -1370,14 +1370,36 @@
   min-width: 0;
 }
 
-.game-launcher__touch-layer {
+.game-launcher__grab-bar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 32px;
   z-index: 5;
   pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: grab;
+}
+
+.game-launcher__grab-bar::after {
+  content: "";
+  display: block;
+  width: 3.5rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  transition: opacity 0.15s ease;
+}
+
+.game-launcher__grab-bar:active {
+  cursor: grabbing;
+}
+
+.game-launcher__grab-bar:active::after {
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .game-launcher__action {

@@ -2986,7 +2986,7 @@
               "</div>" +
             "</div>" +
           "</div>" +
-          '<div class="game-launcher__touch-layer" data-role="game-touch-layer"></div>' +
+          '<div class="game-launcher__grab-bar" data-role="game-grab-bar"></div>' +
         "</div>" +
       "</div>";
 
@@ -3051,7 +3051,7 @@
 
     var panel = viewport.querySelector('[data-role="game-panel"]');
     var panelHandle = viewport.querySelector('[data-role="game-panel-handle"]');
-    var touchLayer = viewport.querySelector('[data-role="game-touch-layer"]');
+    var grabBar = viewport.querySelector('[data-role="game-grab-bar"]');
     var panelOpen = false;
     var dragStartY = 0;
     var dragActive = false;
@@ -3060,8 +3060,8 @@
     function setPanelVisible(visible) {
       panelOpen = visible;
       panel.setAttribute("data-visible", visible ? "true" : "false");
-      if (touchLayer) {
-        touchLayer.style.pointerEvents = visible ? "none" : "all";
+      if (grabBar) {
+        grabBar.style.pointerEvents = visible ? "none" : "all";
       }
     }
 
@@ -3076,25 +3076,7 @@
       });
     }
 
-    function handleOverlayClick(e) {
-      if (panelOpen) return;
-      if (e.target.closest(".game-launcher__panel")) return;
-      if (e.target.closest(".game-launcher__panel-handle")) return;
-
-      var rect = frame.getBoundingClientRect();
-      var x = e.clientX - rect.left;
-      var y = e.clientY - rect.top;
-
-      var mouseEvent = new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true,
-        clientX: x,
-        clientY: y
-      });
-      frame.dispatchEvent(mouseEvent);
-    }
-
-    function handleOverlayTouchStart(e) {
+    function handleGrabTouchStart(e) {
       if (panelOpen) return;
       if (e.target.closest(".game-launcher__panel")) return;
       dragStartY = e.touches[0].clientY;
@@ -3102,7 +3084,7 @@
       dragDelta = 0;
     }
 
-    function handleOverlayTouchMove(e) {
+    function handleGrabTouchMove(e) {
       if (panelOpen) return;
       if (e.target.closest(".game-launcher__panel")) return;
       var touchY = e.touches[0].clientY;
@@ -3125,7 +3107,7 @@
       e.preventDefault();
     }
 
-    function handleOverlayTouchEnd() {
+    function handleGrabTouchEnd() {
       if (panelOpen) return;
       if (!dragActive) return;
 
@@ -3145,11 +3127,10 @@
       dragDelta = 0;
     }
 
-    if (touchLayer) {
-      touchLayer.addEventListener("click", handleOverlayClick);
-      touchLayer.addEventListener("touchstart", handleOverlayTouchStart, { passive: true });
-      touchLayer.addEventListener("touchmove", handleOverlayTouchMove, { passive: false });
-      touchLayer.addEventListener("touchend", handleOverlayTouchEnd);
+    if (grabBar) {
+      grabBar.addEventListener("touchstart", handleGrabTouchStart, { passive: true });
+      grabBar.addEventListener("touchmove", handleGrabTouchMove, { passive: false });
+      grabBar.addEventListener("touchend", handleGrabTouchEnd);
     }
 
     if (panel && !gamePath) {
