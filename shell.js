@@ -3127,8 +3127,8 @@
 
       if (!dragActive) return;
 
-      if (dragDelta < 0 && !panelOpen) {
-        var progress = Math.min(Math.abs(dragDelta) / 120, 1);
+    if (dragDelta > 0 && !panelOpen) {
+        var progress = Math.min(dragDelta / 120, 1);
         panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
       }
 
@@ -3139,7 +3139,7 @@
       if (panelOpen) return;
       if (!dragActive) return;
 
-      if (dragDelta < -60 && !panelOpen) {
+      if (dragDelta > 60 && !panelOpen) {
         setPanelVisible(true);
       } else {
         panel.style.transform = "";
