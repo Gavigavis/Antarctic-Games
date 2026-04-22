@@ -2947,55 +2947,7 @@
 
    pane.innerHTML =
       '<div class="game-launcher">' +
-        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
-          '<div class="game-launcher__panel" data-role="game-panel">' +
-            '<div class="game-launcher__panel-handle" data-role="game-panel-handle"></div>' +
-            '<div class="game-launcher__panel-content">' +
-              '<div class="game-launcher__panel-info">' +
-                '<span class="game-launcher__panel-title">' +
-                  escapeHtml(title) +
-                  "</span>" +
-                  (author
-                    ? '<span class="game-launcher__panel-sep" aria-hidden="true">\u00A0--\u00A0</span>' +
-                      '<span class="game-launcher__panel-author">' +
-                      escapeHtml(author) +
-                      "</span>"
-                    : "") +
-                barHintHtml +
-              "</div>" +
-              '<div class="game-launcher__panel-actions">' +
-                '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
-                '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
-                "Load cloud" +
-                "</button>" +
-                '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
-                "Save cloud" +
-                "</button>" +
-                '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
-                "Back to games" +
-                "</button>" +
-                '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
-                ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
-                fullscreenDisabled +
-                ">" +
-                '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-                '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
-                "</svg>" +
-                "<span>Fullscreen</span>" +
-                "</button>" +
-              "</div>" +
-            "</div>" +
-          "</div>" +
-          '<div class="game-launcher__grab-bar" data-role="game-grab-bar"></div>' +
-        "</div>" +
-      "</div>";
-
-    var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
-    if (!viewport) return pane;
-
-    if (!gamePath) {
-      viewport.innerHTML =
-        '<div class="game-launcher__panel" data-role="game-panel" hidden>' +
+        '<div class="game-launcher__panel" data-role="game-panel">' +
           '<div class="game-launcher__panel-handle" data-role="game-panel-handle"></div>' +
           '<div class="game-launcher__panel-content">' +
             '<div class="game-launcher__panel-info">' +
@@ -3008,36 +2960,46 @@
                     escapeHtml(author) +
                     "</span>"
                   : "") +
-                barHintHtml +
-              "</div>" +
-              '<div class="game-launcher__panel-actions">' +
-                '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
-                '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
-                "Load cloud" +
-                "</button>" +
-                '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
-                "Save cloud" +
-                "</button>" +
-                '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
-                "Back to games" +
-                "</button>" +
-                '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
-                ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
-                fullscreenDisabled +
-                ">" +
-                '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-                '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
-                "</svg>" +
-                "<span>Fullscreen</span>" +
-                "</button>" +
-              "</div>" +
+              barHintHtml +
+            "</div>" +
+            '<div class="game-launcher__panel-actions">' +
+              '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
+              '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
+              "Load cloud" +
+              "</button>" +
+              '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
+              "Save cloud" +
+              "</button>" +
+              '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
+              "Back to games" +
+              "</button>" +
+              '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
+              ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
+              fullscreenDisabled +
+              ">" +
+              '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+              '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
+              "</svg>" +
+              "<span>Fullscreen</span>" +
+              "</button>" +
             "</div>" +
           "</div>" +
-        '</div>' +
+        "</div>" +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
+        '<div class="game-launcher__grab-bar" data-role="game-grab-bar"></div>' +
+      "</div>";
+
+    var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
+    if (!viewport) return pane;
+
+ if (!gamePath) {
+      viewport.innerHTML =
         '<div class="empty-state empty-state--launcher">' +
           "<strong>No game selected yet.</strong>" +
           "<span>Open a title from the game library to launch it here.</span>" +
         "</div>";
+      var panel = pane.querySelector('[data-role="game-panel"]');
+      if (panel) panel.setAttribute("hidden", "");
       return pane;
     }
 
@@ -3049,19 +3011,19 @@
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
 
-    var panel = viewport.querySelector('[data-role="game-panel"]');
-    var panelHandle = viewport.querySelector('[data-role="game-panel-handle"]');
-    var grabBar = viewport.querySelector('[data-role="game-grab-bar"]');
+ var panel = pane.querySelector('[data-role="game-panel"]');
+    var panelHandle = pane.querySelector('[data-role="game-panel-handle"]');
+    var grabBar = pane.querySelector('[data-role="game-grab-bar"]');
     var panelOpen = false;
     var dragStartY = 0;
     var dragActive = false;
     var dragDelta = 0;
 
-    function setPanelVisible(visible) {
+   function setPanelVisible(visible) {
       panelOpen = visible;
       panel.setAttribute("data-visible", visible ? "true" : "false");
       if (grabBar) {
-        grabBar.style.pointerEvents = visible ? "none" : "all";
+        grabBar.classList.toggle("hidden", visible);
       }
     }
 
