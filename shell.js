@@ -3069,10 +3069,41 @@
       setPanelVisible(!panelOpen);
     }
 
+    var panelDragging = false;
+    var panelStartY = 0;
+    var panelDelta = 0;
+
     if (panelHandle) {
       panelHandle.addEventListener("click", function (e) {
         e.stopPropagation();
         togglePanel();
+      });
+      panelHandle.addEventListener("touchstart", function (e) {
+        e.stopPropagation();
+        panelStartY = e.touches[0].clientY;
+        panelDragging = false;
+        panelDelta = 0;
+      }, { passive: true });
+      panelHandle.addEventListener("touchmove", function (e) {
+        if (!panelOpen) return;
+        var y = e.touches[0].clientY;
+        panelDelta = y - panelStartY;
+        if (Math.abs(panelDelta) > 8) panelDragging = true;
+        if (panelDragging && panelDelta > 0) {
+          var progress = Math.min(panelDelta / 120, 1);
+          panel.style.transform = "translateY(" + (progress * 100) + "%)";
+          e.preventDefault();
+        }
+      }, { passive: false });
+      panelHandle.addEventListener("touchend", function (e) {
+        if (!panelOpen || !panelDragging) return;
+        if (panelDelta > 60) {
+          setPanelVisible(false);
+        } else {
+          panel.style.transform = "";
+        }
+        panelDragging = false;
+        panelDelta = 0;
       });
     }
 
@@ -3096,12 +3127,9 @@
 
       if (!dragActive) return;
 
-      if (dragDelta > 0 && !panelOpen) {
-        var progress = Math.min(dragDelta / 120, 1);
-        panel.style.transform = "translateY(" + (-100 + progress * 100) + "%)";
-      } else if (dragDelta < 0 && panelOpen) {
-        var progress2 = Math.min(Math.abs(dragDelta) / 120, 1);
-        panel.style.transform = "translateY(" + (-100 + progress2 * 100) + "%)";
+      if (dragDelta < 0 && !panelOpen) {
+        var progress = Math.min(Math.abs(dragDelta) / 120, 1);
+        panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
       }
 
       e.preventDefault();
@@ -3111,16 +3139,10 @@
       if (panelOpen) return;
       if (!dragActive) return;
 
-      if (dragDelta > 60 && !panelOpen) {
+      if (dragDelta < -60 && !panelOpen) {
         setPanelVisible(true);
-      } else if (dragDelta < -60 && panelOpen) {
-        setPanelVisible(false);
       } else {
-        if (panelOpen) {
-          panel.style.transform = "translateY(0)";
-        } else {
-          panel.style.transform = "";
-        }
+        panel.style.transform = "";
       }
 
       dragActive = false;
