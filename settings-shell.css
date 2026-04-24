@@ -1273,25 +1273,45 @@
 
 .game-launcher__panel {
   position: absolute;
-  bottom: 0;
+  bottom: -40px;
   left: 0;
   right: 0;
   z-index: 10;
-  transform: translateY(100%);
   will-change: transform;
   pointer-events: none;
-  transition: transform 0.2s ease-out;
+  transition: bottom 0.2s ease-out, transform 0.2s ease-out;
 }
 
 .game-launcher__panel[data-visible="true"] {
-  transform: translateY(0);
+  bottom: 0;
   pointer-events: auto;
 }
 
-.game-launcher__panel-content {
-  padding: 0.4rem 1rem 0.6rem;
-  background: rgba(4, 9, 15, 0.95);
+.game-launcher__panel-drag-area {
+  height: 40px;
+  background: rgba(4, 9, 15, 0.9);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+.game-launcher__panel-drag-area::after {
+  content: "";
+  width: 2rem;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.game-launcher__panel-drag-area:active {
+  cursor: grabbing;
+}
+
+.game-launcher__panel-content {
+  padding: 0.3rem 1rem 0.5rem;
+  background: rgba(4, 9, 15, 0.95);
 }
 
 .game-launcher__panel-actions {
@@ -1299,13 +1319,13 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 0.4rem 0.6rem;
+  gap: 0.35rem 0.5rem;
   max-width: 500px;
   margin: 0 auto;
 }
 
 .game-launcher__cloud-status {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--muted);
   flex: 1 1 auto;

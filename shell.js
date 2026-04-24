@@ -2949,6 +2949,7 @@ var barHintHtml =
       '<div class="game-launcher">' +
         '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
         '<div class="game-launcher__panel" data-role="game-panel">' +
+          '<div class="game-launcher__panel-drag-area" data-role="panel-drag-area"></div>' +
           '<div class="game-launcher__panel-content">' +
             '<div class="game-launcher__panel-actions">' +
               '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
@@ -2977,6 +2978,7 @@ var barHintHtml =
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
     var panel = pane.querySelector('[data-role="game-panel"]');
+    var dragArea = pane.querySelector('[data-role="panel-drag-area"]');
 
     if (!viewport || !panel) return pane;
 
@@ -3009,58 +3011,51 @@ var barHintHtml =
       panel.removeAttribute("data-visible");
     }
 
-    var touchStartY = 0;
-    var touchDragging = false;
-    var touchDelta = 0;
+    var startY = 0;
+    var dragging = false;
+    var delta = 0;
 
-    viewport.addEventListener("touchstart", function (e) {
-      if (panelOpen) return;
-      var rect = frame.getBoundingClientRect();
-      var y = e.touches[0].clientY - rect.top;
-      if (y < 60) {
-        touchStartY = e.touches[0].clientY;
-        touchDragging = false;
-        touchDelta = 0;
-      }
-    }, { passive: true });
+    if (dragArea) {
+      dragArea.addEventListener("touchstart", function (e) {
+        startY = e.touches[0].clientY;
+        dragging = false;
+        delta = 0;
+      }, { passive: true });
 
-    viewport.addEventListener("touchmove", function (e) {
-      if (panelOpen) return;
-      var rect = frame.getBoundingClientRect();
-      var y = e.touches[0].clientY - rect.top;
-      if (y > 60) return;
-      if (e.target.closest(".game-launcher__panel")) return;
+      dragArea.addEventListener("touchmove", function (e) {
+        var y = e.touches[0].clientY;
+        delta = y - startY;
 
-      var dy = e.touches[0].clientY - touchStartY;
-      touchDelta = dy;
+        if (Math.abs(delta) > 6) dragging = true;
 
-      if (Math.abs(dy) > 8) touchDragging = true;
+        if (!dragging) return;
 
-      if (touchDragging && dy < 0) {
-        var progress = Math.min(Math.abs(dy) / 80, 1);
-        panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
+        if (panelOpen && delta > 0) {
+          var progress = Math.min(delta / 100, 1);
+          panel.style.transform = "translateY(" + (progress * 100) + "%)";
+        } else if (!panelOpen && delta < 0) {
+          var progress = Math.min(Math.abs(delta) / 100, 1);
+          panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
+        }
+
         e.preventDefault();
-      }
-    }, { passive: false });
+      }, { passive: false });
 
-    viewport.addEventListener("touchend", function () {
-      if (panelOpen) return;
-      if (!touchDragging) return;
+      dragArea.addEventListener("touchend", function () {
+        if (!dragging) return;
+        dragging = false;
 
-      if (touchDelta < -30) {
-        showPanel();
-      } else {
-        panel.style.transform = "";
-      }
+        if (!panelOpen && delta < -20) {
+          showPanel();
+        } else if (panelOpen && delta > 20) {
+          hidePanel();
+        } else {
+          panel.style.transform = "";
+        }
 
-      touchDragging = false;
-      touchDelta = 0;
-    });
-
-    panel.addEventListener("click", function (e) {
-      if (e.target.closest(".game-launcher__panel-actions")) return;
-      hidePanel();
-    });
+        delta = 0;
+      });
+    }
 
     return pane;
   }
