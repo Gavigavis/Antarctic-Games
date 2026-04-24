@@ -2940,13 +2940,14 @@
     var fullscreenDisabled = gamePath ? "" : " disabled";
     var cloudDisabled = gamePath ? "" : " disabled";
 
-    var barHintHtml =
+var barHintHtml =
       !gamePath && !author
         ? '<span class="game-launcher__panel-hint">Pick a game from the library.</span>'
         : "";
 
-   pane.innerHTML =
+    pane.innerHTML =
       '<div class="game-launcher">' +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
         '<div class="game-launcher__panel" data-role="game-panel">' +
           '<div class="game-launcher__panel-handle" data-role="game-panel-handle"></div>' +
           '<div class="game-launcher__panel-content">' +
@@ -2985,21 +2986,21 @@
             "</div>" +
           "</div>" +
         "</div>" +
-        '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
-        '<div class="game-launcher__grab-bar" data-role="game-grab-bar"></div>' +
       "</div>";
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
-    if (!viewport) return pane;
+    var panel = pane.querySelector('[data-role="game-panel"]');
+    var panelHandle = pane.querySelector('[data-role="game-panel-handle"]');
 
- if (!gamePath) {
+    if (!viewport || !panel) return pane;
+
+    if (!gamePath) {
       viewport.innerHTML =
         '<div class="empty-state empty-state--launcher">' +
           "<strong>No game selected yet.</strong>" +
           "<span>Open a title from the game library to launch it here.</span>" +
         "</div>";
-      var panel = pane.querySelector('[data-role="game-panel"]');
-      if (panel) panel.setAttribute("hidden", "");
+      panel.setAttribute("hidden", "");
       return pane;
     }
 
@@ -3011,115 +3012,66 @@
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
 
- var panel = pane.querySelector('[data-role="game-panel"]');
-    var panelHandle = pane.querySelector('[data-role="game-panel-handle"]');
-    var grabBar = pane.querySelector('[data-role="game-grab-bar"]');
-    var panelOpen = false;
-    var dragStartY = 0;
-    var dragActive = false;
-    var dragDelta = 0;
+  var panelOpen = false;
 
-   function setPanelVisible(visible) {
+    function setPanelVisible(visible) {
       panelOpen = visible;
       panel.setAttribute("data-visible", visible ? "true" : "false");
-      if (grabBar) {
-        grabBar.classList.toggle("hidden", visible);
+      if (visible) {
+        panel.removeAttribute("hidden");
       }
     }
 
-    function togglePanel() {
+    if (!panelHandle) return pane;
+
+    var dragging = false;
+    var dragStartY = 0;
+    var dragDelta = 0;
+
+    panelHandle.addEventListener("click", function (e) {
+      if (dragging) return;
       setPanelVisible(!panelOpen);
-    }
+    });
 
-    var panelDragging = false;
-    var panelStartY = 0;
-    var panelDelta = 0;
-
-    if (panelHandle) {
-      panelHandle.addEventListener("click", function (e) {
-        e.stopPropagation();
-        togglePanel();
-      });
-      panelHandle.addEventListener("touchstart", function (e) {
-        e.stopPropagation();
-        panelStartY = e.touches[0].clientY;
-        panelDragging = false;
-        panelDelta = 0;
-      }, { passive: true });
-      panelHandle.addEventListener("touchmove", function (e) {
-        if (!panelOpen) return;
-        var y = e.touches[0].clientY;
-        panelDelta = y - panelStartY;
-        if (Math.abs(panelDelta) > 8) panelDragging = true;
-        if (panelDragging && panelDelta > 0) {
-          var progress = Math.min(panelDelta / 120, 1);
-          panel.style.transform = "translateY(" + (progress * 100) + "%)";
-          e.preventDefault();
-        }
-      }, { passive: false });
-      panelHandle.addEventListener("touchend", function (e) {
-        if (!panelOpen || !panelDragging) return;
-        if (panelDelta > 60) {
-          setPanelVisible(false);
-        } else {
-          panel.style.transform = "";
-        }
-        panelDragging = false;
-        panelDelta = 0;
-      });
-    }
-
-    function handleGrabTouchStart(e) {
-      if (panelOpen) return;
-      if (e.target.closest(".game-launcher__panel")) return;
+    panelHandle.addEventListener("touchstart", function (e) {
       dragStartY = e.touches[0].clientY;
-      dragActive = false;
+      dragging = false;
       dragDelta = 0;
-    }
+    }, { passive: true });
 
-    function handleGrabTouchMove(e) {
-      if (panelOpen) return;
-      if (e.target.closest(".game-launcher__panel")) return;
-      var touchY = e.touches[0].clientY;
-      dragDelta = touchY - dragStartY;
+    panelHandle.addEventListener("touchmove", function (e) {
+      var y = e.touches[0].clientY;
+      dragDelta = y - dragStartY;
 
-      if (!dragActive && Math.abs(dragDelta) > 8) {
-        dragActive = true;
-      }
+      if (Math.abs(dragDelta) > 6) dragging = true;
 
-      if (!dragActive) return;
+      if (!dragging) return;
 
-    if (dragDelta > 0 && !panelOpen) {
-        var progress = Math.min(dragDelta / 120, 1);
+      if (!panelOpen && dragDelta < 0) {
+        var progress = Math.min(Math.abs(dragDelta) / 100, 1);
         panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
+      } else if (panelOpen && dragDelta > 0) {
+        var progress = Math.min(dragDelta / 100, 1);
+        panel.style.transform = "translateY(" + (progress * 100) + "%)";
       }
 
       e.preventDefault();
-    }
+    }, { passive: false });
 
-    function handleGrabTouchEnd() {
-      if (panelOpen) return;
-      if (!dragActive) return;
+    panelHandle.addEventListener("touchend", function () {
+      if (!dragging) return;
 
-      if (dragDelta > 60 && !panelOpen) {
+      if (!panelOpen && dragDelta < -40) {
         setPanelVisible(true);
-      } else {
+      } else if (panelOpen && dragDelta > 40) {
+        setPanelVisible(false);
+      } else if (panelOpen || dragDelta < 0) {
         panel.style.transform = "";
       }
 
-      dragActive = false;
+      dragging = false;
       dragDelta = 0;
-    }
-
-    if (grabBar) {
-      grabBar.addEventListener("touchstart", handleGrabTouchStart, { passive: true });
-      grabBar.addEventListener("touchmove", handleGrabTouchMove, { passive: false });
-      grabBar.addEventListener("touchend", handleGrabTouchEnd);
-    }
-
-    if (panel && !gamePath) {
-      panel.setAttribute("hidden", "");
-    }
+    });
 
     return pane;
   }
