@@ -2951,37 +2951,37 @@
 
     pane.innerHTML =
       '<div class="game-launcher">' +
-        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
         '<div class="game-launcher__bar" data-role="game-bar">' +
           '<div class="game-launcher__bar-content">' +
-            '<button type="button" class="game-launcher__action game-launcher__grab toolbar-button" title="Drag" aria-label="Drag">' +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>' +
+            '<button type="button" class="game-launcher__action game-launcher__grab toolbar-button" title="Drag game" aria-label="Drag game">' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>' +
             "</svg>" +
             "</button>" +
             '<span class="game-launcher__bar-separator"></span>' +
             '<button type="button" class="game-launcher__action game-launcher__open-btn toolbar-button"' +
             ' data-game-open-new-tab="1" title="Open in new tab"' +
             fullscreenDisabled + '>' +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>' +
             '</svg>' +
             '</button>' +
             '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
             ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
             fullscreenDisabled + " title=\"Fullscreen\">" +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m-5.25 11.25v-4.5m0 4.5h4.5m-4.5 0L9 15m7.5-7.5 5.25-5.25v4.5m0 4.5-5.25-5.25"/>' +
             "</svg>" +
             "</button>" +
             '<span class="game-launcher__bar-separator"></span>' +
             '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-game-back="1" title="Back to games">' +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M6 18 18 6M6 6l12 12"/>' +
             "</svg>" +
             "</button>" +
           "</div>" +
         "</div>" +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
         '</div>' +
       "</div>";
 
@@ -3045,6 +3045,58 @@
     }
     scheduleAutosave();
     setTimeout(doAutosave, 2000);
+
+    var grabBtn = pane.querySelector('.game-launcher__grab');
+    if (grabBtn && tab.paneEl) {
+      var dragging = false;
+      var dragPane = tab.paneEl;
+      var offsetX = 0;
+      var offsetY = 0;
+
+      grabBtn.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dragging = true;
+        var rect = dragPane.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        dragPane.style.transition = 'none';
+        dragPane.style.position = 'fixed';
+        dragPane.style.left = rect.left + 'px';
+        dragPane.style.top = rect.top + 'px';
+        dragPane.style.width = rect.width + 'px';
+        dragPane.style.height = rect.height + 'px';
+        dragPane.style.zIndex = '2147483647';
+        grabBtn.style.cursor = 'grabbing';
+        grabBtn.style.opacity = '1';
+        document.body.style.userSelect = 'none';
+        document.body.style.pointerEvents = 'none';
+        var shellEl = dragPane.closest('.shell-stage') || dragPane.parentElement;
+        if (shellEl) shellEl.style.pointerEvents = 'auto';
+      }, true);
+
+      document.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        e.preventDefault();
+        var newX = e.clientX - offsetX;
+        var newY = e.clientY - offsetY;
+        dragPane.style.left = newX + 'px';
+        dragPane.style.top = newY + 'px';
+      }, { passive: false });
+
+      document.addEventListener('pointerup', function () {
+        if (!dragging) return;
+        dragging = false;
+        grabBtn.style.cursor = '';
+        grabBtn.style.opacity = '';
+        document.body.style.userSelect = '';
+        document.body.style.pointerEvents = '';
+        dragPane.style.transition = 'left 0.3s ease, top 0.3s ease';
+        setTimeout(function () {
+          dragPane.style.transition = '';
+        }, 350);
+      });
+    }
 
     return pane;
   }
