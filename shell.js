@@ -3055,7 +3055,6 @@
     scheduleAutosave();
     setTimeout(doAutosave, 2000);
 
-    var origDestroyTab = destroyTab;
     return pane;
   }
 
