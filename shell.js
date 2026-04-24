@@ -2955,8 +2955,8 @@
         '<div class="game-launcher__bar" data-role="game-bar">' +
           '<div class="game-launcher__bar-content">' +
             '<button type="button" class="game-launcher__action game-launcher__grab toolbar-button" title="Drag game" aria-label="Drag game">' +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-            '<path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M12 5L12 19"/><path d="M9 17L12 20L15 17"/><path d="M15 7L12 4L9 7"/><path d="M5 12L19 12"/><path d="M17 15L20 12L17 9"/><path d="M7 9L4 12L7 15"/>' +
             "</svg>" +
             "</button>" +
             '<span class="game-launcher__bar-separator"></span>' +
@@ -3052,8 +3052,11 @@
     var grabBtn = pane.querySelector('.game-launcher__grab');
     if (!grabBtn) return;
 
+    var bar = pane.querySelector('.game-launcher__bar');
+    if (!bar) return;
+
     var dragging = false;
-    var dragPane = pane;
+    var dragBar = bar;
     var offsetX = 0;
     var offsetY = 0;
 
@@ -3061,21 +3064,20 @@
       e.preventDefault();
       e.stopPropagation();
       dragging = true;
-      var rect = dragPane.getBoundingClientRect();
+      var rect = dragBar.getBoundingClientRect();
       offsetX = e.clientX - rect.left;
       offsetY = e.clientY - rect.top;
-      dragPane.style.transition = 'none';
-      dragPane.style.position = 'fixed';
-      dragPane.style.left = rect.left + 'px';
-      dragPane.style.top = rect.top + 'px';
-      dragPane.style.width = rect.width + 'px';
-      dragPane.style.height = rect.height + 'px';
-      dragPane.style.zIndex = '2147483647';
+      dragBar.style.transition = 'none';
+      dragBar.style.position = 'fixed';
+      dragBar.style.left = rect.left + 'px';
+      dragBar.style.top = rect.top + 'px';
+      dragBar.style.zIndex = '2147483647';
+      dragBar.style.transform = 'none';
       grabBtn.style.cursor = 'grabbing';
       grabBtn.style.opacity = '1';
       document.body.style.userSelect = 'none';
       document.body.style.pointerEvents = 'none';
-      var shellEl = dragPane.closest('.shell-stage') || dragPane.parentElement;
+      var shellEl = pane.closest('.shell-stage') || pane.parentElement;
       if (shellEl) shellEl.style.pointerEvents = 'auto';
     };
 
@@ -3084,8 +3086,8 @@
       e.preventDefault();
       var newX = e.clientX - offsetX;
       var newY = e.clientY - offsetY;
-      dragPane.style.left = newX + 'px';
-      dragPane.style.top = newY + 'px';
+      dragBar.style.left = newX + 'px';
+      dragBar.style.top = newY + 'px';
     };
 
     var onPointerUp = function () {
@@ -3095,9 +3097,9 @@
       grabBtn.style.opacity = '';
       document.body.style.userSelect = '';
       document.body.style.pointerEvents = '';
-      dragPane.style.transition = 'left 0.3s ease, top 0.3s ease';
+      dragBar.style.transition = 'left 0.3s ease, top 0.3s ease';
       setTimeout(function () {
-        dragPane.style.transition = '';
+        dragBar.style.transition = '';
       }, 350);
     };
 
