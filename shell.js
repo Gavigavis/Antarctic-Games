@@ -5058,7 +5058,7 @@
       var gameFrame2 = gamePane2.querySelector("iframe.game-launcher__frame");
       if (!gameFrame2) return;
       var src = gameFrame2.getAttribute("src");
-      if (src) openNewTab(src);
+      if (src) window.open(src, "_blank");
       return;
     }
 
