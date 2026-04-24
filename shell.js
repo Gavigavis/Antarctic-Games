@@ -3012,66 +3012,7 @@ var barHintHtml =
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
 
-  var panelOpen = false;
-
-    function setPanelVisible(visible) {
-      panelOpen = visible;
-      panel.setAttribute("data-visible", visible ? "true" : "false");
-      if (visible) {
-        panel.removeAttribute("hidden");
-      }
-    }
-
-    if (!panelHandle) return pane;
-
-    var dragging = false;
-    var dragStartY = 0;
-    var dragDelta = 0;
-
-    panelHandle.addEventListener("click", function (e) {
-      if (dragging) return;
-      setPanelVisible(!panelOpen);
-    });
-
-    panelHandle.addEventListener("touchstart", function (e) {
-      dragStartY = e.touches[0].clientY;
-      dragging = false;
-      dragDelta = 0;
-    }, { passive: true });
-
-    panelHandle.addEventListener("touchmove", function (e) {
-      var y = e.touches[0].clientY;
-      dragDelta = y - dragStartY;
-
-      if (Math.abs(dragDelta) > 6) dragging = true;
-
-      if (!dragging) return;
-
-      if (!panelOpen && dragDelta < 0) {
-        var progress = Math.min(Math.abs(dragDelta) / 100, 1);
-        panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
-      } else if (panelOpen && dragDelta > 0) {
-        var progress = Math.min(dragDelta / 100, 1);
-        panel.style.transform = "translateY(" + (progress * 100) + "%)";
-      }
-
-      e.preventDefault();
-    }, { passive: false });
-
-    panelHandle.addEventListener("touchend", function () {
-      if (!dragging) return;
-
-      if (!panelOpen && dragDelta < -40) {
-        setPanelVisible(true);
-      } else if (panelOpen && dragDelta > 40) {
-        setPanelVisible(false);
-      } else if (panelOpen || dragDelta < 0) {
-        panel.style.transform = "";
-      }
-
-      dragging = false;
-      dragDelta = 0;
-    });
+ panel.setAttribute("data-visible", "true");
 
     return pane;
   }
