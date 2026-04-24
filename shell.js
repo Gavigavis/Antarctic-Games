@@ -2949,20 +2949,7 @@ var barHintHtml =
       '<div class="game-launcher">' +
         '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
         '<div class="game-launcher__panel" data-role="game-panel">' +
-          '<div class="game-launcher__panel-handle" data-role="game-panel-handle"></div>' +
           '<div class="game-launcher__panel-content">' +
-            '<div class="game-launcher__panel-info">' +
-              '<span class="game-launcher__panel-title">' +
-                escapeHtml(title) +
-                "</span>" +
-                (author
-                  ? '<span class="game-launcher__panel-sep" aria-hidden="true">\u00A0--\u00A0</span>' +
-                    '<span class="game-launcher__panel-author">' +
-                    escapeHtml(author) +
-                    "</span>"
-                  : "") +
-              barHintHtml +
-            "</div>" +
             '<div class="game-launcher__panel-actions">' +
               '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
               '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
@@ -2990,7 +2977,6 @@ var barHintHtml =
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
     var panel = pane.querySelector('[data-role="game-panel"]');
-    var panelHandle = pane.querySelector('[data-role="game-panel-handle"]');
 
     if (!viewport || !panel) return pane;
 
@@ -3000,7 +2986,6 @@ var barHintHtml =
           "<strong>No game selected yet.</strong>" +
           "<span>Open a title from the game library to launch it here.</span>" +
         "</div>";
-      panel.setAttribute("hidden", "");
       return pane;
     }
 
@@ -3012,7 +2997,70 @@ var barHintHtml =
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
 
- panel.setAttribute("data-visible", "true");
+    var panelOpen = false;
+
+    function showPanel() {
+      panelOpen = true;
+      panel.setAttribute("data-visible", "true");
+    }
+
+    function hidePanel() {
+      panelOpen = false;
+      panel.removeAttribute("data-visible");
+    }
+
+    var touchStartY = 0;
+    var touchDragging = false;
+    var touchDelta = 0;
+
+    viewport.addEventListener("touchstart", function (e) {
+      if (panelOpen) return;
+      var rect = frame.getBoundingClientRect();
+      var y = e.touches[0].clientY - rect.top;
+      if (y < 60) {
+        touchStartY = e.touches[0].clientY;
+        touchDragging = false;
+        touchDelta = 0;
+      }
+    }, { passive: true });
+
+    viewport.addEventListener("touchmove", function (e) {
+      if (panelOpen) return;
+      var rect = frame.getBoundingClientRect();
+      var y = e.touches[0].clientY - rect.top;
+      if (y > 60) return;
+      if (e.target.closest(".game-launcher__panel")) return;
+
+      var dy = e.touches[0].clientY - touchStartY;
+      touchDelta = dy;
+
+      if (Math.abs(dy) > 8) touchDragging = true;
+
+      if (touchDragging && dy < 0) {
+        var progress = Math.min(Math.abs(dy) / 80, 1);
+        panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    viewport.addEventListener("touchend", function () {
+      if (panelOpen) return;
+      if (!touchDragging) return;
+
+      if (touchDelta < -30) {
+        showPanel();
+      } else {
+        panel.style.transform = "";
+      }
+
+      touchDragging = false;
+      touchDelta = 0;
+    });
+
+    panel.addEventListener("click", function (e) {
+      if (e.target.closest(".game-launcher__panel-actions")) return;
+      hidePanel();
+    });
 
     return pane;
   }
