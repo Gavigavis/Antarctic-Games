@@ -1247,12 +1247,6 @@
   line-height: 1.5;
 }
 
-.game-launcher__cloud-status {
-  font-size: 0.75rem;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
 .game-launcher {
   position: relative;
   display: flex;
@@ -1288,6 +1282,18 @@
   gap: 0.15rem;
   max-width: 500px;
   width: 100%;
+}
+
+.game-launcher__autosave-status {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--muted);
+  flex: 1 1 auto;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0.5rem;
 }
 
 .game-launcher__bar-icon {

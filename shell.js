@@ -786,9 +786,13 @@
       tab.chatState.pollHandle = 0;
     }
     clearPendingWebSearch(tab);
-    if (tab && tab.paneEl && tab.paneEl.__paneSyncTimer) {
+   if (tab && tab.paneEl && tab.paneEl.__paneSyncTimer) {
       window.clearTimeout(tab.paneEl.__paneSyncTimer);
       tab.paneEl.__paneSyncTimer = 0;
+    }
+    if (tab && tab.__gameAutosaveInterval) {
+      clearInterval(tab.__gameAutosaveInterval);
+      tab.__gameAutosaveInterval = null;
     }
     if (tab && tab.paneEl && typeof tab.paneEl.__socialUnsubscribe === "function") {
       tab.paneEl.__socialUnsubscribe();
@@ -2950,16 +2954,7 @@ var barHintHtml =
         '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
         '<div class="game-launcher__bar" data-role="game-bar">' +
           '<div class="game-launcher__bar-content">' +
-            '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + " title=\"Load cloud\">" +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M5 20h2v-7H5v7zm4 0h2v-11H9v11zm4 0h2V5h-2v15zm4 0h2V8h-2v12zm4 0h2V4h-2v16z"/>' +
-            "</svg>" +
-            "</button>" +
-            '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + " title=\"Save cloud\">" +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zm-5 16a3 3 0 110-6 3 3 0 010 6zm3-10H5V5h10v4z"/>' +
-            "</svg>" +
-            "</button>" +
+            '<span class="game-launcher__autosave-status" data-role="game-autosave-status"></span>' +
             '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games" title="Back to games">' +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
             '<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>' +
@@ -2977,6 +2972,7 @@ var barHintHtml =
       "</div>";
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
+    var autosaveStatus = pane.querySelector('[data-role="game-autosave-status"]');
 
     if (!viewport) return pane;
 
@@ -2997,6 +2993,44 @@ var barHintHtml =
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
 
+ var lastAutosave = Date.now();
+
+    function doAutosave() {
+      if (!autosaveStatus) return;
+      if (!gamePath) return;
+      var socialApi = getSocialApi();
+      if (!socialApi) return;
+      var frameEl = pane.querySelector("iframe.game-launcher__frame");
+      if (!frameEl || !frameEl.contentWindow) return;
+
+      try {
+        var storageArea = frameEl.contentWindow.localStorage;
+        var snapshot = captureStorageArea(storageArea);
+        if (Object.keys(snapshot).length === 0) return;
+
+        var key = "antarctic.games.autosave." + tab.path;
+        socialApi.saveUserFile("games", key, JSON.stringify(snapshot)).then(function () {
+          lastAutosave = Date.now();
+          var secs = Math.round((Date.now() - lastAutosave) / 1000);
+          autosaveStatus.textContent = "Saved " + secs + "s ago";
+        }).catch(function () {
+          autosaveStatus.textContent = "Autosave failed";
+        });
+      } catch (e) {}
+    }
+
+    function scheduleAutosave() {
+      if (tab.__gameAutosaveInterval) clearInterval(tab.__gameAutosaveInterval);
+      tab.__gameAutosaveInterval = setInterval(function () {
+        doAutosave();
+      }, 60000);
+    }
+
+    autosaveStatus.textContent = "Saving...";
+    scheduleAutosave();
+    setTimeout(doAutosave, 2000);
+
+    var origDestroyTab = destroyTab;
     return pane;
   }
 
