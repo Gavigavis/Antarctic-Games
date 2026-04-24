@@ -1266,11 +1266,13 @@
 }
 
 .game-launcher__bar {
-  flex: 0 0 auto;
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.35rem;
   z-index: 10;
 }
 

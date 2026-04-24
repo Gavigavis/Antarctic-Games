@@ -2961,12 +2961,12 @@
 
     pane.innerHTML =
       '<div class="game-launcher">' +
-        '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
         '<div class="game-launcher__bar" data-role="game-bar">' +
           '<div class="game-launcher__bar-content">' +
             '<button type="button" class="game-launcher__action game-launcher__grab toolbar-button" title="Drag" aria-label="Drag">' +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/>' +
+            '<path d="M10 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm7-10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>' +
             "</svg>" +
             "</button>" +
             '<span class="game-launcher__bar-separator"></span>' +
@@ -2987,11 +2987,12 @@
             '<button type="button" class="game-launcher__action game-launcher__hide-btn toolbar-button" data-game-hide="1" title="Close game"' +
             hideDisabled + " aria-label=\"Close game\">" +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M19 13H5v-2h14v2z"/>' +
+            '<path d="M7 7l10 10M17 7 7 17"/>' +
             "</svg>" +
             "</button>" +
           "</div>" +
         "</div>" +
+        '</div>' +
       "</div>";
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
