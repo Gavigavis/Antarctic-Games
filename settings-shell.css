@@ -1336,10 +1336,6 @@
   cursor: grabbing;
 }
 
-.game-launcher__hide-btn:hover {
-  background: rgba(255, 70, 70, 0.2);
-}
-
 .game-launcher__fullscreen-btn:hover:not(:disabled) {
   background: rgba(59, 140, 255, 0.2);
 }

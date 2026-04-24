@@ -2949,16 +2949,6 @@
         ? '<span class="game-launcher__panel-hint">Pick a game from the library.</span>'
         : "";
 
-    var openInNewTabHtml = gamePath
-      ? '<button type="button" class="game-launcher__action game-launcher__open-btn toolbar-button" title="Open in new tab" data-game-open-new-tab="1">' +
-        '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-        '<path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>' +
-        '</svg>' +
-        '</button>'
-      : '';
-
-    var hideDisabled = gamePath ? "" : " disabled";
-
     pane.innerHTML =
       '<div class="game-launcher">' +
         '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
@@ -2966,28 +2956,28 @@
           '<div class="game-launcher__bar-content">' +
             '<button type="button" class="game-launcher__action game-launcher__grab toolbar-button" title="Drag" aria-label="Drag">' +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M10 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm7-10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>' +
+            '<path d="M12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>' +
+            "</svg>" +
+            "</button>" +
+            '<span class="game-launcher__bar-separator"></span>' +
+            '<button type="button" class="game-launcher__action game-launcher__open-btn toolbar-button"' +
+            ' data-game-open-new-tab="1" title="Open in new tab"' +
+            fullscreenDisabled + '>' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>' +
+            '</svg>' +
+            '</button>' +
+            '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
+            ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
+            fullscreenDisabled + " title=\"Fullscreen\">" +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
             "</svg>" +
             "</button>" +
             '<span class="game-launcher__bar-separator"></span>' +
             '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-game-back="1" title="Back to games">' +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
             '<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>' +
-            "</svg>" +
-            "</button>" +
-            '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
-            ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
-            fullscreenDisabled + " title=\"Fullscreen\">" +
-            '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
-            "</svg>" +
-            "</button>" +
-            openInNewTabHtml +
-            '<span class="game-launcher__bar-separator"></span>' +
-            '<button type="button" class="game-launcher__action game-launcher__hide-btn toolbar-button" data-game-hide="1" title="Close game"' +
-            hideDisabled + " aria-label=\"Close game\">" +
-            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<path d="M7 7l10 10M17 7 7 17"/>' +
             "</svg>" +
             "</button>" +
           "</div>" +
@@ -5017,22 +5007,6 @@
       if (!gameFrame2) return;
       var src = gameFrame2.getAttribute("src");
       if (src) openNewTab(src);
-      return;
-    }
-
-    var hideBtn = target.closest("[data-game-hide]");
-    if (hideBtn) {
-      if (hideBtn.disabled) return;
-      var gamePane3 = target.closest(".shell-pane--gamelauncher");
-      if (!gamePane3) return;
-      var gameTab = null;
-      for (var i = 0; i < state.tabs.length; i++) {
-        if (state.tabs[i].paneEl === gamePane3) {
-          gameTab = state.tabs[i];
-          break;
-        }
-      }
-      if (gameTab) closeTab(gameTab.id);
       return;
     }
 
