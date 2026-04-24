@@ -2948,39 +2948,34 @@ var barHintHtml =
     pane.innerHTML =
       '<div class="game-launcher">' +
         '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
-        '<div class="game-launcher__panel" data-role="game-panel">' +
-          '<div class="game-launcher__panel-drag-area" data-role="panel-drag-area"></div>' +
-          '<div class="game-launcher__panel-content">' +
-            '<div class="game-launcher__panel-actions">' +
-              '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
-              '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
-              "Load cloud" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
-              "Save cloud" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
-              "Back to games" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
-              ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
-              fullscreenDisabled +
-              ">" +
-              '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-              '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
-              "</svg>" +
-              "<span>Fullscreen</span>" +
-              "</button>" +
-            "</div>" +
+        '<div class="game-launcher__bar" data-role="game-bar">' +
+          '<div class="game-launcher__bar-content">' +
+            '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
+            '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
+            "Load cloud" +
+            "</button>" +
+            '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
+            "Save cloud" +
+            "</button>" +
+            '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
+            "Back to games" +
+            "</button>" +
+            '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
+            ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
+            fullscreenDisabled +
+            ">" +
+            '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
+            "</svg>" +
+            "<span>Fullscreen</span>" +
+            "</button>" +
           "</div>" +
         "</div>" +
       "</div>";
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
-    var panel = pane.querySelector('[data-role="game-panel"]');
-    var dragArea = pane.querySelector('[data-role="panel-drag-area"]');
 
-    if (!viewport || !panel) return pane;
+    if (!viewport) return pane;
 
     if (!gamePath) {
       viewport.innerHTML =
@@ -2998,64 +2993,6 @@ var barHintHtml =
     frame.setAttribute("referrerpolicy", "no-referrer");
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
-
-    var panelOpen = false;
-
-    function showPanel() {
-      panelOpen = true;
-      panel.setAttribute("data-visible", "true");
-    }
-
-    function hidePanel() {
-      panelOpen = false;
-      panel.removeAttribute("data-visible");
-    }
-
-    var startY = 0;
-    var dragging = false;
-    var delta = 0;
-
-    if (dragArea) {
-      dragArea.addEventListener("touchstart", function (e) {
-        startY = e.touches[0].clientY;
-        dragging = false;
-        delta = 0;
-      }, { passive: true });
-
-      dragArea.addEventListener("touchmove", function (e) {
-        var y = e.touches[0].clientY;
-        delta = y - startY;
-
-        if (Math.abs(delta) > 6) dragging = true;
-
-        if (!dragging) return;
-
-        if (panelOpen && delta > 0) {
-          var progress = Math.min(delta / 100, 1);
-          panel.style.transform = "translateY(" + (progress * 100) + "%)";
-        } else if (!panelOpen && delta < 0) {
-          var progress = Math.min(Math.abs(delta) / 100, 1);
-          panel.style.transform = "translateY(" + (100 - progress * 100) + "%)";
-        }
-
-        e.preventDefault();
-      }, { passive: false });
-
-      dragArea.addEventListener("touchend", function () {
-        if (!dragging) return;
-        dragging = false;
-
-        if (!panelOpen && delta < -20) {
-          showPanel();
-        } else if (panelOpen && delta > 20) {
-          hidePanel();
-        } else {
-          panel.style.transform = "";
-        }
-
-        delta = 0;
-      });
-    }
 
     return pane;
   }
