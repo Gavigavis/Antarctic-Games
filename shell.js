@@ -3049,7 +3049,9 @@
       }, 60000);
     }
 
-    autosaveStatus.textContent = "Saving...";
+    if (autosaveStatus) {
+      autosaveStatus.textContent = "Saving...";
+    }
     scheduleAutosave();
     setTimeout(doAutosave, 2000);
 
