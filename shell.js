@@ -5023,24 +5023,12 @@
     if (gameBackBtn) {
       var backPane = target.closest(".shell-pane--gamelauncher");
       if (!backPane) return;
-      var backIndex = -1;
-      for (var bi = 0; bi < state.tabs.length; bi++) {
-        if (state.tabs[bi].paneEl === backPane) {
-          backIndex = bi;
-          break;
-        }
-      }
-      if (backIndex < 0) return;
-      var prevIndex = backIndex - 1;
-      while (prevIndex >= 0) {
-        if (state.tabs[prevIndex].view !== "gamelauncher") {
-          setActiveTab(state.tabs[prevIndex].id);
-          return;
-        }
-        prevIndex -= 1;
-      }
-      if (backIndex > 0) {
-        setActiveTab(state.tabs[backIndex - 1].id);
+      var bar = backPane.querySelector('.game-launcher__bar');
+      if (!bar) return;
+      if (bar.style.display === 'none') {
+        bar.style.display = '';
+      } else {
+        bar.style.display = 'none';
       }
       return;
     }
