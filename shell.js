@@ -2950,24 +2950,27 @@ var barHintHtml =
         '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
         '<div class="game-launcher__bar" data-role="game-bar">' +
           '<div class="game-launcher__bar-content">' +
-            '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
-            '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
-            "Load cloud" +
+            '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + " title=\"Load cloud\">" +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M5 20h2v-7H5v7zm4 0h2v-11H9v11zm4 0h2V5h-2v15zm4 0h2V8h-2v12zm4 0h2V4h-2v16z"/>' +
+            "</svg>" +
             "</button>" +
-            '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
-            "Save cloud" +
+            '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + " title=\"Save cloud\">" +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zm-5 16a3 3 0 110-6 3 3 0 010 6zm3-10H5V5h10v4z"/>' +
+            "</svg>" +
             "</button>" +
-            '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
-            "Back to games" +
+            '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games" title="Back to games">' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>' +
+            "</svg>" +
             "</button>" +
             '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
             ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
-            fullscreenDisabled +
-            ">" +
-            '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            fullscreenDisabled + " title=\"Fullscreen\">" +
+            '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
             '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
             "</svg>" +
-            "<span>Fullscreen</span>" +
             "</button>" +
           "</div>" +
         "</div>" +

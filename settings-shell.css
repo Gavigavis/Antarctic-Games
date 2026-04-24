@@ -1284,21 +1284,61 @@
 .game-launcher__bar-content {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.3rem 0.5rem;
+  justify-content: center;
+  gap: 0.15rem;
   max-width: 500px;
   width: 100%;
 }
 
-.game-launcher__cloud-status {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--muted);
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.game-launcher__bar-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.game-launcher__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  min-width: 2rem;
+  padding: 0.35rem;
+  font-size: 0;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.game-launcher__action:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.game-launcher__action:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.game-launcher__back {
+  background: transparent;
+}
+
+.game-launcher__back:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.game-launcher__fullscreen-btn {
+  background: transparent;
+}
+
+.game-launcher__fullscreen-btn:hover:not(:disabled) {
+  background: rgba(59, 140, 255, 0.2);
+  border-color: rgba(88, 160, 255, 0.45);
+}
+
+.game-launcher__fullscreen-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .game-launcher__frame {
