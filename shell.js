@@ -2970,7 +2970,7 @@
             "</svg>" +
             "</button>" +
             '<span class="game-launcher__bar-separator"></span>' +
-            '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games" title="Back to games">' +
+            '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-game-back="1" title="Back to games">' +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
             '<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>' +
             "</svg>" +
@@ -4965,6 +4965,32 @@
     var routeButton = target.closest("[data-route]");
     if (routeButton) {
       navigateCurrent(routeButton.getAttribute("data-route"));
+      return;
+    }
+
+    var gameBackBtn = target.closest("[data-game-back]");
+    if (gameBackBtn) {
+      var backPane = target.closest(".shell-pane--gamelauncher");
+      if (!backPane) return;
+      var backIndex = -1;
+      for (var bi = 0; bi < state.tabs.length; bi++) {
+        if (state.tabs[bi].paneEl === backPane) {
+          backIndex = bi;
+          break;
+        }
+      }
+      if (backIndex < 0) return;
+      var prevIndex = backIndex - 1;
+      while (prevIndex >= 0) {
+        if (state.tabs[prevIndex].view !== "gamelauncher") {
+          setActiveTab(state.tabs[prevIndex].id);
+          return;
+        }
+        prevIndex -= 1;
+      }
+      if (backIndex > 0) {
+        setActiveTab(state.tabs[backIndex - 1].id);
+      }
       return;
     }
 
