@@ -2951,6 +2951,7 @@
 
     pane.innerHTML =
       '<div class="game-launcher">' +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
         '<div class="game-launcher__bar" data-role="game-bar">' +
           '<div class="game-launcher__bar-content">' +
             '<button type="button" class="game-launcher__action game-launcher__grab toolbar-button" title="Drag game" aria-label="Drag game">' +
@@ -2970,18 +2971,17 @@
             ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
             fullscreenDisabled + " title=\"Fullscreen\">" +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-            '<path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m-5.25 11.25v-4.5m0 4.5h4.5m-4.5 0L9 15m7.5-7.5 5.25-5.25v4.5m0 4.5-5.25-5.25"/>' +
+            '<path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>' +
             "</svg>" +
             "</button>" +
             '<span class="game-launcher__bar-separator"></span>' +
             '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-game-back="1" title="Back to games">' +
             '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-            '<path d="M6 18 18 6M6 6l12 12"/>' +
+            '<path d="M15.75 19.5 8.25 12l7.5-7.5"/>' +
             "</svg>" +
             "</button>" +
           "</div>" +
         "</div>" +
-        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
         '</div>' +
       "</div>";
 
