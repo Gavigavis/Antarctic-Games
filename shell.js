@@ -3046,57 +3046,64 @@
     scheduleAutosave();
     setTimeout(doAutosave, 2000);
 
+    if (pane.__gameDragInitialized) return;
+    pane.__gameDragInitialized = true;
+
     var grabBtn = pane.querySelector('.game-launcher__grab');
-    if (grabBtn && tab.paneEl) {
-      var dragging = false;
-      var dragPane = tab.paneEl;
-      var offsetX = 0;
-      var offsetY = 0;
+    if (!grabBtn) return;
 
-      grabBtn.addEventListener('pointerdown', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        dragging = true;
-        var rect = dragPane.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-        dragPane.style.transition = 'none';
-        dragPane.style.position = 'fixed';
-        dragPane.style.left = rect.left + 'px';
-        dragPane.style.top = rect.top + 'px';
-        dragPane.style.width = rect.width + 'px';
-        dragPane.style.height = rect.height + 'px';
-        dragPane.style.zIndex = '2147483647';
-        grabBtn.style.cursor = 'grabbing';
-        grabBtn.style.opacity = '1';
-        document.body.style.userSelect = 'none';
-        document.body.style.pointerEvents = 'none';
-        var shellEl = dragPane.closest('.shell-stage') || dragPane.parentElement;
-        if (shellEl) shellEl.style.pointerEvents = 'auto';
-      }, true);
+    var dragging = false;
+    var dragPane = pane;
+    var offsetX = 0;
+    var offsetY = 0;
 
-      document.addEventListener('pointermove', function (e) {
-        if (!dragging) return;
-        e.preventDefault();
-        var newX = e.clientX - offsetX;
-        var newY = e.clientY - offsetY;
-        dragPane.style.left = newX + 'px';
-        dragPane.style.top = newY + 'px';
-      }, { passive: false });
+    var onPointerDown = function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragging = true;
+      var rect = dragPane.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      dragPane.style.transition = 'none';
+      dragPane.style.position = 'fixed';
+      dragPane.style.left = rect.left + 'px';
+      dragPane.style.top = rect.top + 'px';
+      dragPane.style.width = rect.width + 'px';
+      dragPane.style.height = rect.height + 'px';
+      dragPane.style.zIndex = '2147483647';
+      grabBtn.style.cursor = 'grabbing';
+      grabBtn.style.opacity = '1';
+      document.body.style.userSelect = 'none';
+      document.body.style.pointerEvents = 'none';
+      var shellEl = dragPane.closest('.shell-stage') || dragPane.parentElement;
+      if (shellEl) shellEl.style.pointerEvents = 'auto';
+    };
 
-      document.addEventListener('pointerup', function () {
-        if (!dragging) return;
-        dragging = false;
-        grabBtn.style.cursor = '';
-        grabBtn.style.opacity = '';
-        document.body.style.userSelect = '';
-        document.body.style.pointerEvents = '';
-        dragPane.style.transition = 'left 0.3s ease, top 0.3s ease';
-        setTimeout(function () {
-          dragPane.style.transition = '';
-        }, 350);
-      });
-    }
+    var onPointerMove = function (e) {
+      if (!dragging) return;
+      e.preventDefault();
+      var newX = e.clientX - offsetX;
+      var newY = e.clientY - offsetY;
+      dragPane.style.left = newX + 'px';
+      dragPane.style.top = newY + 'px';
+    };
+
+    var onPointerUp = function () {
+      if (!dragging) return;
+      dragging = false;
+      grabBtn.style.cursor = '';
+      grabBtn.style.opacity = '';
+      document.body.style.userSelect = '';
+      document.body.style.pointerEvents = '';
+      dragPane.style.transition = 'left 0.3s ease, top 0.3s ease';
+      setTimeout(function () {
+        dragPane.style.transition = '';
+      }, 350);
+    };
+
+    grabBtn.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('pointermove', onPointerMove, { passive: false });
+    document.addEventListener('pointerup', onPointerUp);
 
     return pane;
   }
