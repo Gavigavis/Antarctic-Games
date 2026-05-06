@@ -5,7 +5,7 @@
   var STORAGE_KEY = "antarctic.shell.state.v1";
   var LEGACY_STORAGE_KEY = "palladium.shell.state.v1";
   var PROXY_STORAGE_VERSION_KEY = "antarctic.proxy.storage.version.v1";
-  var PROXY_STORAGE_VERSION = "scramjet-storage-2026-03-23-proxy-5";
+  var PROXY_STORAGE_VERSION = "antarctic-storage-2026-05-03-proxy-v1";
   var PROXY_REPAIR_RELOAD_KEY = "antarctic.proxy.repair.reload.v1";
   var PROXY_CONTROLLER_RELOAD_KEY = "antarctic.proxy.controller.reload.v1";
   var PROXY_CONTROLLER_RELOAD_MAX_ATTEMPTS = 3;
@@ -13,7 +13,7 @@
   var PROXY_REQUEST_HEADER_HEADERS = "x-antarctic-proxy-headers";
   var LOCAL_APP_ASSET_PARAM = "antarctic_asset";
   var LOCAL_APP_ASSET_VERSION = "2026-03-22-asset-1";
-  var PROXY_RUNTIME_ASSET_VERSION = "2026-03-23-proxy-5";
+  var PROXY_RUNTIME_ASSET_VERSION = "antarctic-proxy-2026-05-03-v1";
   var PROXY_DISABLED_MESSAGE = "Web browsing could not start right now.";
   var PROXY_IDLE_MESSAGE = "Antarctic will connect the ready fallback proxy when you open a page.";
   var PROXY_BOOT_MESSAGE = "Connecting the ready fallback proxy...";
@@ -21,15 +21,11 @@
   var SHELL_SCALE_MIN = 0.78;
   var PRIVATE_SEARCH_AUTOFILL_RETRY_MS = 180;
   var PRIVATE_SEARCH_AUTOFILL_MAX_ATTEMPTS = 12;
-  var SCRAMJET_PREFIX = "/service/scramjet/";
-  var SCRAMJET_SW_PATH = "/sw.js";
+  var PROXY_PREFIX = "/service/antarctic/";
+  var PROXY_SW_PATH = "/sw-proxy.js";
+  var PROXY_ENGINE_PATH = "/proxy-engine.js";
   var BAREMUX_WORKER_PATH = "/baremux/worker.js";
   var LIBCURL_TRANSPORT_PATH = "/libcurl/index.mjs";
-  var SCRAMJET_FILES = {
-    all: "/scram/scramjet.all.js",
-    sync: "/scram/scramjet.sync.js",
-    wasm: "/scram/scramjet.wasm.wasm"
-  };
   /* Same artwork as sidebar Games link; viewBox crops top to hide cord */
   var GAMES_CONTROLLER_PATH_MAIN =
     "M373.1,256.2H267.4v-21.4c0-17,13.9-30.9,30.9-30.9h102.3c30.6,0,55.4-24.9,55.4-55.4s-24.9-55.4-55.4-55.4H111.4c-17,0-30.9-13.9-30.9-30.9V23.8c0-6.8-5.5-12.3-12.3-12.3S56,17.1,56,23.8v38.3c0,30.6,24.9,55.4,55.4,55.4h289.2c17,0,30.9,13.9,30.9,30.9s-13.9,30.9-30.9,30.9H298.3c-30.6,0-55.4,24.9-55.4,55.4v21.4h-104c-67.3,0-122.1,54.8-122.1,122.1c0,67.3,54.8,122.1,122.1,122.1c36.4,0,66.3-16.3,86.8-47.1h60.7c20.6,30.9,50.4,47.1,86.8,47.1c67.3,0,122.1-54.8,122.1-122.1C495.3,311,440.5,256.2,373.1,256.2z M373.1,475.9c-30.4,0-53.1-13.5-69.5-41.1c-2.2-3.7-6.2-6-10.5-6h-74.2c-4.3,0-8.3,2.3-10.5,6c-16.4,27.7-39.1,41.1-69.5,41.1c-53.8,0-97.6-43.8-97.6-97.6c0-53.8,43.8-97.6,97.6-97.6h234.3c53.8,0,97.6,43.8,97.6,97.6C470.8,432.1,427,475.9,373.1,475.9z";
@@ -3824,17 +3820,17 @@
     }
   }
 
-  function loadScramjetControllerClass() {
-    if (typeof window.$scramjetLoadController !== "function") {
-      throw new Error("Scramjet bundle is not loaded on the static frontend.");
+  function loadAntarcticControllerClass() {
+    if (typeof window.$antarcticLoadController !== "function") {
+      throw new Error("Antarctic proxy engine is not loaded on the static frontend.");
     }
 
-    var loaded = window.$scramjetLoadController();
-    if (!loaded || typeof loaded.ScramjetController !== "function") {
-      throw new Error("Scramjet controller factory is unavailable.");
+    var loaded = window.$antarcticLoadController();
+    if (!loaded || typeof loaded.AntarcticController !== "function") {
+      throw new Error("Antarctic controller factory is unavailable.");
     }
 
-    return loaded.ScramjetController;
+    return loaded.AntarcticController;
   }
 
   function registerProxyServiceWorker() {
