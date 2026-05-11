@@ -5,7 +5,7 @@
   var STORAGE_KEY = "antarctic.shell.state.v1";
   var LEGACY_STORAGE_KEY = "palladium.shell.state.v1";
   var PROXY_STORAGE_VERSION_KEY = "antarctic.proxy.storage.version.v1";
-  var PROXY_STORAGE_VERSION = "scramjet-storage-2026-03-23-proxy-5";
+  var PROXY_STORAGE_VERSION = "antarctic-storage-2026-05-03-proxy-v1";
   var PROXY_REPAIR_RELOAD_KEY = "antarctic.proxy.repair.reload.v1";
   var PROXY_CONTROLLER_RELOAD_KEY = "antarctic.proxy.controller.reload.v1";
   var PROXY_CONTROLLER_RELOAD_MAX_ATTEMPTS = 3;
@@ -13,7 +13,7 @@
   var PROXY_REQUEST_HEADER_HEADERS = "x-antarctic-proxy-headers";
   var LOCAL_APP_ASSET_PARAM = "antarctic_asset";
   var LOCAL_APP_ASSET_VERSION = "2026-03-22-asset-1";
-  var PROXY_RUNTIME_ASSET_VERSION = "2026-03-23-proxy-5";
+  var PROXY_RUNTIME_ASSET_VERSION = "antarctic-proxy-2026-05-03-v1";
   var PROXY_DISABLED_MESSAGE = "Web browsing could not start right now.";
   var PROXY_IDLE_MESSAGE = "Antarctic will connect the ready fallback proxy when you open a page.";
   var PROXY_BOOT_MESSAGE = "Connecting the ready fallback proxy...";
@@ -21,15 +21,11 @@
   var SHELL_SCALE_MIN = 0.78;
   var PRIVATE_SEARCH_AUTOFILL_RETRY_MS = 180;
   var PRIVATE_SEARCH_AUTOFILL_MAX_ATTEMPTS = 12;
-  var SCRAMJET_PREFIX = "/service/scramjet/";
-  var SCRAMJET_SW_PATH = "/sw.js";
+  var PROXY_PREFIX = "/service/antarctic/";
+  var PROXY_SW_PATH = "/sw-proxy.js";
+  var PROXY_ENGINE_PATH = "/proxy-engine.js";
   var BAREMUX_WORKER_PATH = "/baremux/worker.js";
   var LIBCURL_TRANSPORT_PATH = "/libcurl/index.mjs";
-  var SCRAMJET_FILES = {
-    all: "/scram/scramjet.all.js",
-    sync: "/scram/scramjet.sync.js",
-    wasm: "/scram/scramjet.wasm.wasm"
-  };
   /* Same artwork as sidebar Games link; viewBox crops top to hide cord */
   var GAMES_CONTROLLER_PATH_MAIN =
     "M373.1,256.2H267.4v-21.4c0-17,13.9-30.9,30.9-30.9h102.3c30.6,0,55.4-24.9,55.4-55.4s-24.9-55.4-55.4-55.4H111.4c-17,0-30.9-13.9-30.9-30.9V23.8c0-6.8-5.5-12.3-12.3-12.3S56,17.1,56,23.8v38.3c0,30.6,24.9,55.4,55.4,55.4h289.2c17,0,30.9,13.9,30.9,30.9s-13.9,30.9-30.9,30.9H298.3c-30.6,0-55.4,24.9-55.4,55.4v21.4h-104c-67.3,0-122.1,54.8-122.1,122.1c0,67.3,54.8,122.1,122.1,122.1c36.4,0,66.3-16.3,86.8-47.1h60.7c20.6,30.9,50.4,47.1,86.8,47.1c67.3,0,122.1-54.8,122.1-122.1C495.3,311,440.5,256.2,373.1,256.2z M373.1,475.9c-30.4,0-53.1-13.5-69.5-41.1c-2.2-3.7-6.2-6-10.5-6h-74.2c-4.3,0-8.3,2.3-10.5,6c-16.4,27.7-39.1,41.1-69.5,41.1c-53.8,0-97.6-43.8-97.6-97.6c0-53.8,43.8-97.6,97.6-97.6h234.3c53.8,0,97.6,43.8,97.6,97.6C470.8,432.1,427,475.9,373.1,475.9z";
@@ -786,9 +782,13 @@
       tab.chatState.pollHandle = 0;
     }
     clearPendingWebSearch(tab);
-    if (tab && tab.paneEl && tab.paneEl.__paneSyncTimer) {
+   if (tab && tab.paneEl && tab.paneEl.__paneSyncTimer) {
       window.clearTimeout(tab.paneEl.__paneSyncTimer);
       tab.paneEl.__paneSyncTimer = 0;
+    }
+    if (tab && tab.__gameAutosaveInterval) {
+      clearInterval(tab.__gameAutosaveInterval);
+      tab.__gameAutosaveInterval = null;
     }
     if (tab && tab.paneEl && typeof tab.paneEl.__socialUnsubscribe === "function") {
       tab.paneEl.__socialUnsubscribe();
@@ -2930,7 +2930,7 @@
 
   function createGameLauncherPane(tab) {
     var pane = document.createElement("section");
-    pane.className = "shell-pane shell-pane--internal shell-pane--gamelauncher";
+    pane.className = "shell-pane shell-pane--gamelauncher";
     pane.addEventListener("click", handlePaneAction);
 
     var title = cleanText(tab.title) || "Game Launcher";
@@ -2940,54 +2940,50 @@
     var fullscreenDisabled = gamePath ? "" : " disabled";
     var cloudDisabled = gamePath ? "" : " disabled";
 
-    var barHintHtml =
+   var barHintHtml =
       !gamePath && !author
-        ? '<span class="game-launcher__bar-hint"><span class="game-launcher__bar-sep" aria-hidden="true"> -- </span>Pick a game from the library.</span>'
+        ? '<span class="game-launcher__panel-hint">Pick a game from the library.</span>'
         : "";
 
     pane.innerHTML =
       '<div class="game-launcher">' +
-        '<div class="game-launcher__stage">' +
-          '<div class="game-launcher__viewport" data-role="game-launcher-viewport"></div>' +
-          '<div class="game-launcher__bar">' +
-            '<div class="game-launcher__bar-start">' +
-              '<span class="game-launcher__bar-title">' +
-                escapeHtml(title) +
-                "</span>" +
-                (author
-                  ? '<span class="game-launcher__bar-sep" aria-hidden="true">\u00A0--\u00A0</span>' +
-                    '<span class="game-launcher__bar-author">' +
-                    escapeHtml(author) +
-                    "</span>"
-                  : "") +
-              barHintHtml +
-            "</div>" +
-            '<div class="game-launcher__bar-end">' +
-              '<span class="game-launcher__cloud-status" data-role="game-cloud-status">' + (gamePath ? "Cloud save ready." : "Pick a game to enable cloud saves.") + "</span>" +
-              '<button type="button" class="game-launcher__action toolbar-button" data-game-load="1"' + cloudDisabled + ">" +
-              "Load cloud" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action toolbar-button" data-game-save="1"' + cloudDisabled + ">" +
-              "Save cloud" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-route="antarctic://games">' +
-              "Back to games" +
-              "</button>" +
-              '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
-              ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
-              fullscreenDisabled +
-              ">" +
-              '<svg class="ui-icon ui-icon--filled game-launcher__fullscreen-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-              '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>' +
-              "</svg>" +
-              "<span>Fullscreen</span>" +
-              "</button>" +
-            "</div>" +
+        '<div class="game-launcher__viewport" data-role="game-launcher-viewport">' +
+        '<div class="game-launcher__bar" data-role="game-bar">' +
+          '<div class="game-launcher__bar-content">' +
+            '<button type="button" class="game-launcher__action game-launcher__grab toolbar-button" title="Drag game" aria-label="Drag game">' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M12 5L12 19"/><path d="M9 17L12 20L15 17"/><path d="M15 7L12 4L9 7"/><path d="M5 12L19 12"/><path d="M17 15L20 12L17 9"/><path d="M7 9L4 12L7 15"/>' +
+            "</svg>" +
+            "</button>" +
+            '<span class="game-launcher__bar-separator"></span>' +
+            '<button type="button" class="game-launcher__action game-launcher__open-btn toolbar-button"' +
+            ' data-game-open-new-tab="1" title="Open in new tab"' +
+            fullscreenDisabled + '>' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>' +
+            '</svg>' +
+            '</button>' +
+            '<button type="button" class="game-launcher__action game-launcher__fullscreen-btn toolbar-button"' +
+            ' data-game-fullscreen="1" aria-label="Enter fullscreen"' +
+            fullscreenDisabled + " title=\"Fullscreen\">" +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>' +
+            "</svg>" +
+            "</button>" +
+            '<span class="game-launcher__bar-separator"></span>' +
+            '<button type="button" class="game-launcher__action game-launcher__back toolbar-button" data-game-back="1" title="Back to games">' +
+            '<svg class="game-launcher__bar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M15.75 19.5 8.25 12l7.5-7.5"/>' +
+            "</svg>" +
+            "</button>" +
           "</div>" +
         "</div>" +
+        '</div>' +
       "</div>";
 
     var viewport = pane.querySelector('[data-role="game-launcher-viewport"]');
+    var autosaveStatus = pane.querySelector('[data-role="game-autosave-status"]');
+
     if (!viewport) return pane;
 
     if (!gamePath) {
@@ -3007,23 +3003,105 @@
     viewport.appendChild(frame);
     attachAntarcticFontBridge(frame);
 
-    pane.addEventListener("click", function (event) {
-      var target = event.target;
-      if (!target || typeof target.closest !== "function") return;
+ var lastAutosave = Date.now();
 
-      var saveButton = target.closest("[data-game-save]");
-      if (saveButton) {
-        event.preventDefault();
-        saveGameCloudState(tab, pane);
-        return;
-      }
+    function doAutosave() {
+      if (!autosaveStatus) return;
+      if (!gamePath) return;
+      var socialApi = getSocialApi();
+      if (!socialApi) return;
+      var frameEl = pane.querySelector("iframe.game-launcher__frame");
+      if (!frameEl || !frameEl.contentWindow) return;
 
-      var loadButton = target.closest("[data-game-load]");
-      if (loadButton) {
-        event.preventDefault();
-        loadGameCloudState(tab, pane);
-      }
-    });
+      try {
+        var storageArea = frameEl.contentWindow.localStorage;
+        var snapshot = captureStorageArea(storageArea);
+        if (Object.keys(snapshot).length === 0) return;
+
+        var key = "antarctic.games.autosave." + tab.path;
+        socialApi.saveUserFile("games", key, JSON.stringify(snapshot)).then(function () {
+          lastAutosave = Date.now();
+          var secs = Math.round((Date.now() - lastAutosave) / 1000);
+          autosaveStatus.textContent = "Saved " + secs + "s ago";
+        }).catch(function () {
+          autosaveStatus.textContent = "Autosave failed";
+        });
+      } catch (e) {}
+    }
+
+    function scheduleAutosave() {
+      if (tab.__gameAutosaveInterval) clearInterval(tab.__gameAutosaveInterval);
+      tab.__gameAutosaveInterval = setInterval(function () {
+        doAutosave();
+      }, 60000);
+    }
+
+    if (autosaveStatus) {
+      autosaveStatus.textContent = "Saving...";
+    }
+    scheduleAutosave();
+    setTimeout(doAutosave, 2000);
+
+    if (pane.__gameDragInitialized) return;
+    pane.__gameDragInitialized = true;
+
+    var grabBtn = pane.querySelector('.game-launcher__grab');
+    if (!grabBtn) return;
+
+    var bar = pane.querySelector('.game-launcher__bar');
+    if (!bar) return;
+
+    var dragging = false;
+    var dragBar = bar;
+    var offsetX = 0;
+    var offsetY = 0;
+
+    var onPointerDown = function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragging = true;
+      var rect = dragBar.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      dragBar.style.transition = 'none';
+      dragBar.style.position = 'fixed';
+      dragBar.style.left = rect.left + 'px';
+      dragBar.style.top = rect.top + 'px';
+      dragBar.style.zIndex = '2147483647';
+      dragBar.style.transform = 'none';
+      grabBtn.style.cursor = 'grabbing';
+      grabBtn.style.opacity = '1';
+      document.body.style.userSelect = 'none';
+      document.body.style.pointerEvents = 'none';
+      var shellEl = pane.closest('.shell-stage') || pane.parentElement;
+      if (shellEl) shellEl.style.pointerEvents = 'auto';
+    };
+
+    var onPointerMove = function (e) {
+      if (!dragging) return;
+      e.preventDefault();
+      var newX = e.clientX - offsetX;
+      var newY = e.clientY - offsetY;
+      dragBar.style.left = newX + 'px';
+      dragBar.style.top = newY + 'px';
+    };
+
+    var onPointerUp = function () {
+      if (!dragging) return;
+      dragging = false;
+      grabBtn.style.cursor = '';
+      grabBtn.style.opacity = '';
+      document.body.style.userSelect = '';
+      document.body.style.pointerEvents = '';
+      dragBar.style.transition = 'left 0.3s ease, top 0.3s ease';
+      setTimeout(function () {
+        dragBar.style.transition = '';
+      }, 350);
+    };
+
+    grabBtn.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('pointermove', onPointerMove, { passive: false });
+    document.addEventListener('pointerup', onPointerUp);
 
     return pane;
   }
@@ -3742,17 +3820,17 @@
     }
   }
 
-  function loadScramjetControllerClass() {
-    if (typeof window.$scramjetLoadController !== "function") {
-      throw new Error("Scramjet bundle is not loaded on the static frontend.");
+  function loadAntarcticControllerClass() {
+    if (typeof window.$antarcticLoadController !== "function") {
+      throw new Error("Antarctic proxy engine is not loaded on the static frontend.");
     }
 
-    var loaded = window.$scramjetLoadController();
-    if (!loaded || typeof loaded.ScramjetController !== "function") {
-      throw new Error("Scramjet controller factory is unavailable.");
+    var loaded = window.$antarcticLoadController();
+    if (!loaded || typeof loaded.AntarcticController !== "function") {
+      throw new Error("Antarctic controller factory is unavailable.");
     }
 
-    return loaded.ScramjetController;
+    return loaded.AntarcticController;
   }
 
   function registerProxyServiceWorker() {
@@ -4937,6 +5015,20 @@
       return;
     }
 
+    var gameBackBtn = target.closest("[data-game-back]");
+    if (gameBackBtn) {
+      var backPane = target.closest(".shell-pane--gamelauncher");
+      if (!backPane) return;
+      var bar = backPane.querySelector('.game-launcher__bar');
+      if (!bar) return;
+      if (bar.style.display === 'none') {
+        bar.style.display = '';
+      } else {
+        bar.style.display = 'none';
+      }
+      return;
+    }
+
     var fullscreenBtn = target.closest("[data-game-fullscreen]");
     if (fullscreenBtn) {
       if (fullscreenBtn.disabled) return;
@@ -4949,6 +5041,17 @@
       } else {
         gameFrame.requestFullscreen().catch(function () {});
       }
+      return;
+    }
+
+    var openNewTabBtn = target.closest("[data-game-open-new-tab]");
+    if (openNewTabBtn) {
+      var gamePane2 = target.closest(".shell-pane--gamelauncher");
+      if (!gamePane2) return;
+      var gameFrame2 = gamePane2.querySelector("iframe.game-launcher__frame");
+      if (!gameFrame2) return;
+      var src = gameFrame2.getAttribute("src");
+      if (src) window.open(src, "_blank");
       return;
     }
 
