@@ -451,7 +451,7 @@
       "category": "others",
       "path": "games/others/downloads.html",
       "image": "images/game-img/ultrakill.png",
-      "launchUri": "antarctic://gamelauncher?path=games%2Fothers%2downloads.html&title=gta-vice-city&author=rockstar%20Cake%20Logic"
+      "launchUri": "antarctic://gamelauncher?path=games%2Fothers%2download.html&title=gta-vice-city&author=rockstar%20Cake%20Logic"
     }
   ]
 }
