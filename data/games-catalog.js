@@ -445,13 +445,15 @@ window.ANTARCTIC_GAMES_CATALOG = {
       "launchUri": "antarctic://gamelauncher?path=games%2Faction%2Fultrakill.html&title=ULTRAKILL&author=New%20Blood%20Interactive%2C%20Cake%20Logic"
     },
     {
-      "file": "download.html"
-      "title": "gta vice city",
-      "author": "rockstar",
-      "category": "others",
-      "path": "games/others/downloads.html",
-      "image": "images/game-img/ultrakill.png",
-      "launchUri": "antarctic://gamelauncher?path=games%2Fothers%2download.html&title=gta-vice/city&author=rockstar%20Cake%20Logic"
-    }
+      {
+  "file": "download.html",
+  "title": "GTA Vice City",
+  "author": "Rockstar",
+  "category": "Others",
+  "path": "games/others/download.html",
+  "image": "images/game-img/ultrakill.png",
+  "launchUri": "antarctic://gamelauncher?path=games%2Fothers%2Fdownload.html&title=GTA%20Vice%20City&author=Rockstar"
+}
+           
   ]
 };
